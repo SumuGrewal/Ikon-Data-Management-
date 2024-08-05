@@ -7,7 +7,6 @@ app = Flask(__name__)
 @app.route('/')
 def hello():
     return render_template('login.html')
-    print("Test")
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
