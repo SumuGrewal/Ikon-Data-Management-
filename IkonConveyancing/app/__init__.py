@@ -16,8 +16,8 @@ def createApp():
    
     migrate = Migrate(app, db)  # initialize flask-migrate here
 
-    from IkonConveyancing.app.routes import routes
-    app.register_blueprint(routes, url_prefix='/')
+    with app.app_context():
+        from IkonConveyancing.app import routes  # import routes within app context
 
     from IkonConveyancing.app.models import User  # ensure all models are imported
    
@@ -39,5 +39,5 @@ def createDatabase(app):
         with app.app_context():
             db.create_all()
         print(
-        "------------------------------------\ndatabase initialized and created \n------------------------------------\n2024. made with ♥ by khush\n"
+        "------------------------------------\ndatabase initialized and created \n------------------------------------\n2024. made with â¥ by khush\n"
     )
