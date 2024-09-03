@@ -1,0 +1,186 @@
+/* dashboard.css */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.navigation {
+    width: 250px;
+    background-color: #162938;
+    color: #fff;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.navigation ul {
+    list-style: none;
+    padding: 0;
+}
+
+.navigation ul li {
+    margin: 20px 0;
+}
+
+.navigation ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.navigation ul li a ion-icon {
+    margin-right: 10px;
+}
+
+.navigation ul li.active a {
+    background-color: #1e3a5f;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dashboard section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard .recently-viewed {
+    flex: 2;
+}
+
+.dashboard .alerts {
+    flex: 1;
+}
+
+.dashboard .calendar-widget {
+    flex: 1;
+}
+
+.dashboard .settlements {
+    flex: 1;
+}
+
+.dashboard h2 {
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #162938;
+}
+
+.dashboard .recently-viewed ul {
+    list-style: none;
+    padding: 0;
+}
+
+.dashboard .recently-viewed ul li {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard .recently-viewed ul li a {
+    text-decoration: none;
+    color: #162938;
+    font-weight: 500;
+}
+
+.dashboard .recently-viewed ul li a:hover {
+    text-decoration: underline;
+}
+
+.dashboard .recently-viewed ul li span {
+    color: #888;
+}
+
+.dashboard .calendar-widget .calendar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dashboard .calendar-widget .calendar h3 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #162938;
+}
+
+.dashboard .calendar-widget .calendar .days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dashboard .calendar-widget .calendar .days div {
+    width: 40px;
+    height: 40px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.dashboard .calendar-widget .calendar .days div:hover {
+    background-color: #e0e0e0;
+}
+
+.dashboard .calendar-widget .calendar .days .active {
+    background-color: #162938;
+    color: #fff;
+}
+
+.dashboard .alerts ul {
+    list-style: none;
+    padding: 0;
+}
+
+.dashboard .alerts ul li {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard .alerts ul li span {
+    color: #888;
+}
+
+.dashboard .settlements {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    background-color: #162938;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 1.2em;
+}

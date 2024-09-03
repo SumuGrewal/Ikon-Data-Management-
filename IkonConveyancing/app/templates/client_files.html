@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Files - Ikon Conveyancing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='ClientFiles/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navigation">
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                <li class="active"><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                <li><a href="#"><ion-icon name="mail"></ion-icon> Send Email</a></li>
+                <li><a href="#"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
+                <li><a href="#"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <div class="file-list">
+                <div class="filters">
+                    <label for="status">Status:</label>
+                    <select id="status">
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="finished">Finished</option>
+                    </select>
+                    <label for="sort-by">Sort By:</label>
+                    <select id="sort-by">
+                        <option value="file-number">File Number</option>
+                        <option value="client-name">Client Name</option>
+                        <option value="address">Address</option>
+                        <option value="status">Status</option>
+                        <option value="settlement-date">Settlement Date</option>
+                    </select>
+                    <label for="property-address">Property Address:</label>
+                    <input type="text" id="property-address" placeholder="Enter address">
+                    <button id="apply-filters">Apply Filters</button>
+                    <button id="clear-filters">Clear Filters</button>
+                </div>
+                <div class="file-entries">
+                    <div class="file-entry" data-file-number="BS0624" data-status="pending">
+                        <span>File Number: BS0624</span>
+                        <span>Client Name: Rajveer Singh</span>
+                        <span>Address: 76 Drive St.</span>
+                        <span>Status: Pending</span>
+                        <span>Settlement Date: 13-08-2024</span>
+                    </div>
+                    <div class="file-entry" data-file-number="BS0626" data-status="finished">
+                        <span>File Number: BS0626</span>
+                        <span>Client Name: Yash Batish</span>
+                        <span>Address: 8 First St.</span>
+                        <span>Status: Finished</span>
+                        <span>Settlement Date: 15-08-2024</span>
+                    </div>
+                </div>
+            </div>
+            <div class="file-details">
+                <h2>File Details</h2>
+                <div class="details-content">
+                    <!-- File details will be dynamically loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="{{ url_for('static', filename='client_files.js') }}"></script>
+</body>
+
+</html>

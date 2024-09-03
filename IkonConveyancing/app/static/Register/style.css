@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 * {
     margin: 0;
@@ -113,12 +113,12 @@ header {
     padding: 40px;
 }
 
-.wrapper .form-box.login {
+.wrapper .form-box.register {
     transition: transform .18s ease;
     transform: translateX(0);
 }
 
-.wrapper.active .form-box.login {
+.wrapper.active .form-box.register {
     transition: none;
     transform: translateX(-400px);
 }
@@ -254,4 +254,4 @@ header {
 
 .login-register p a:hover {
     text-decoration: underline;
-}
+} */

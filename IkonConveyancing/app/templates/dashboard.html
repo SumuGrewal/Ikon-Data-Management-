@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Ikon Conveyancing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='Dashboard/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navigation">
+            <ul>
+                <li class="active"><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
+                <li><a href="#"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
+                <li><a href="#"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
+            </ul>
+        </nav>
+        <main class="dashboard">
+            <section class="recently-viewed">
+                <h2>Recently Viewed</h2>
+                <!-- Add recently viewed items here -->
+            </section>
+            <section class="alerts">
+                <h2>Alerts</h2>
+                <!-- Add alerts here -->
+            </section>
+            <section class="calendar-widget">
+                <h2>Calendar</h2>
+                <!-- Add calendar widget here -->
+            </section>
+            <section class="settlements">
+                <h2>Settlements</h2>
+                <!-- Add settlements info here -->
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,138 @@
+/* email.css */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.navigation {
+    width: 250px;
+    background-color: #162938;
+    color: #fff;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.navigation ul {
+    list-style: none;
+    padding: 0;
+}
+
+.navigation ul li {
+    margin: 20px 0;
+}
+
+.navigation ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.navigation ul li a ion-icon {
+    margin-right: 10px;
+}
+
+.navigation ul li.active a {
+    background-color: #1e3a5f;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.email-templates {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.email-templates button {
+    padding: 10px;
+    border: none;
+    background-color: #162938;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.email-templates button:hover {
+    background-color: #1e3a5f;
+}
+
+.template-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.template-list .template-item {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.template-list .template-item:hover {
+    background-color: #e0e0e0;
+}
+
+.template-details {
+    flex: 2;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.template-details h2 {
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #162938;
+}
+
+.template-details form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.template-details form label {
+    font-weight: bold;
+}
+
+.template-details form input,
+.template-details form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.template-details form button {
+    padding: 10px;
+    border: none;
+    background-color: #162938;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.template-details form button:hover {
+    background-color: #1e3a5f;
+}
