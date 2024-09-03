@@ -13,9 +13,8 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(email=email).first()
         if user is None or not user.check_password(password):
-            flash('Invalid email or password')
-            return redirect(url_for('login'))
-        return redirect(url_for('index'))
+            return render_template('goodbye.html')
+        return render_template('hello.html')
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])

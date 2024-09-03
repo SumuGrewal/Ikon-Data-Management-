@@ -1,4 +1,4 @@
-# run.py
+
 from IkonConveyancing.app import app, db
 from IkonConveyancing.app.models import User
 
