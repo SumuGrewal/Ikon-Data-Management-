@@ -1,12 +1,10 @@
 from flask import render_template, flash, redirect, url_for, request
-from app import app, db
-from app.models import User
-from werkzeug.urls import url_parse
 from IkonConveyancing.app import app, db
+from IkonConveyancing.app.models import User
 
 @app.route('/')
 def home():
-    return "Hello, World!"
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
