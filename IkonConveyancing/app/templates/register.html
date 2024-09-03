@@ -19,13 +19,9 @@
 
 <body>
     <div class="wrapper active-popup">
-        <span class="icon-close">
-            <ion-icon name="close"></ion-icon>
-        </span>
-
         <div class="form-box register">
             <h2>Registration</h2>
-            <form action="/register" method="POST">
+            <form action="{{ url_for('register') }}" method="POST">
                 <div class="input-box">
                     <span class="icon">
                         <ion-icon name="person"></ion-icon>
