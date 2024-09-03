@@ -24,7 +24,7 @@ def createApp():
     createDatabase(app)
 
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'login'
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -39,5 +39,5 @@ def createDatabase(app):
         with app.app_context():
             db.create_all()
         print(
-        "------------------------------------\ndatabase initialized and created \n------------------------------------\n2024. made with â¥ by khush\n"
+        "------------------------------------\ndatabase initialized and created \n------------------------------------\n2024. made with Ã¢ÂÂ¥ by khush\n"
     )

@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request, current_app
 from IkonConveyancing.app import db
 from IkonConveyancing.app.models import User
+from flask_login import login_user, logout_user, login_required, current_user
 
 @current_app.route('/')
 def home():
@@ -15,9 +16,10 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user is None or not user.check_password(password):
             print("Login failed: Invalid email or password")  # Debug print statement
-            return render_template('goodbye.html')
+            return render_template('goodbyeworld.html')
+        login_user(user)
         print("Login successful")  # Debug print statement
-        return render_template('hello.html')
+        return render_template('helloworld.html')
     return render_template('login.html')
 
 @current_app.route('/register', methods=['GET', 'POST'])
