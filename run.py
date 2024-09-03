@@ -1,3 +1,4 @@
+# run.py
 from IkonConveyancing.app import app, db
 from IkonConveyancing.app.models import User
 
@@ -7,4 +8,3 @@ def make_shell_context():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
