@@ -1,7 +1,23 @@
-/* /IkonConveyancing/app/static/css/style.css */
+/* style.css */
 
+/* General styles */
 body {
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+/* Navigation styles */
+
+body {
+    font-family: 'Poppins', sans-serif;
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
@@ -9,17 +25,15 @@ body {
 
 .container {
     display: flex;
-    width: 100%;
-    margin: 0 auto;
-    padding: 20px;
+    height: 100vh;
 }
 
 .navigation {
-    width: 20%;
-    background-color: #333;
+    width: 250px;
+    background-color: #162938;
     color: #fff;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .navigation ul {
@@ -28,12 +42,13 @@ body {
 }
 
 .navigation ul li {
-    margin-bottom: 10px;
+    margin: 20px 0;
 }
 
 .navigation ul li a {
     color: #fff;
     text-decoration: none;
+    font-size: 1.1em;
     display: flex;
     align-items: center;
 }
@@ -43,68 +58,90 @@ body {
 }
 
 .navigation ul li.active a {
-    font-weight: bold;
+    background-color: #1e3a5f;
+    padding: 10px;
+    border-radius: 5px;
 }
 
-.profile-content {
-    width: 80%;
+.main-content {
+    flex: 1;
     padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 20px;
 }
 
-.profile-header {
+.file-list {
+    flex: 2;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filters {
     display: flex;
-    align-items: center;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-.profile-picture img {
-    border-radius: 50%;
-    width: 100px;
-    height: 100px;
-    margin-right: 20px;
+.filters label {
+    font-weight: bold;
 }
 
-.profile-info h2 {
-    margin: 0;
-    font-size: 24px;
+.filters select,
+.filters input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-.profile-info p {
-    margin: 5px 0 0;
-    color: #666;
-}
-
-.profile-details h3 {
-    margin-top: 0;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    text-align: center;
+.filters button {
+    padding: 5px 10px;
     border: none;
+    background-color: #162938;
+    color: #fff;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-.btn:hover {
-    background-color: #0056b3;
+.filters button:hover {
+    background-color: #1e3a5f;
 }
+
+.file-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file-entry {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.file-entry:hover {
+    background-color: #e0e0e0;
+}
+
+.file-details {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.file-details h2 {
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #162938;
+}
+
+/* .details-content {
+    /* Add styles for file details content */
+/* }
