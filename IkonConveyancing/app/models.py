@@ -37,5 +37,44 @@ class EmailTemplate(db.Model):
             'user_id': self.user_id
         }
 
+
     def __repr__(self):
         return f"EmailTemplate('{self.subject}', '{self.client_name}')"
+    
+
+
+from IkonConveyancing.app import db
+
+
+
+class ClientFile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    file_number = db.Column(db.String(20), unique=True, nullable=False)
+    client_name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    settlement_date = db.Column(db.Date, nullable=False)
+    checklist_items = db.relationship('ChecklistItem', backref='client_file', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'file_number': self.file_number,
+            'client_name': self.client_name,
+            'address': self.address,
+            'status': self.status,
+            'settlement_date': self.settlement_date.isoformat()
+        }
+
+class ChecklistItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_file_id = db.Column(db.Integer, db.ForeignKey('client_file.id'), nullable=False)
+    description = db.Column(db.String(200), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'description': self.description,
+            'status': self.status
+        }

@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist - Ikon Conveyancing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='Checklist/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <nav class="navigation">
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
+                <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
+                <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
+                <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
+            </ul>
+        </nav>
+        <main class="checklist-content">
+            <div class="file-list">
+                <h2>Client Files</h2>
+                <ul id="file-list">
+                    <!-- File list will be dynamically populated here -->
+                </ul>
+            </div>
+            <div class="checklist">
+                <h2>Checklist for <span id="selected-file"></span></h2>
+                <ul id="checklist-items">
+                    <!-- Checklist items will be dynamically populated here -->
+                </ul>
+                <div class="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+                <span id="progress-percentage"></span>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='checklist/script.js') }}"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>

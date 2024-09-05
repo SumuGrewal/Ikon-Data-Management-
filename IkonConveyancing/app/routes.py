@@ -21,7 +21,7 @@ def login():
         if user is None or not user.check_password(password):
             return render_template('goodbyeworld.html')
         login_user(user)
-        return render_template('helloworld.html')
+        return render_template('dashboard.html')
     return render_template('login.html')
 
 @current_app.route('/register', methods=['GET', 'POST'])
@@ -165,3 +165,45 @@ def events():
         else:
             events = Event.query.filter_by(user_id=current_user.id).all()
         return jsonify([event.to_dict() for event in events])
+    
+
+from flask import render_template, jsonify, request
+from IkonConveyancing.app.models import ClientFile, ChecklistItem
+from flask_login import login_required
+
+# ... (existing imports and routes)
+
+@current_app.route('/checklist')
+@login_required
+def checklist():
+    return render_template('checklist.html')
+
+@current_app.route('/api/client_files', methods=['GET'])
+@login_required
+def get_client_files():
+    files = ClientFile.query.all()
+    return jsonify([file.to_dict() for file in files])
+
+@current_app.route('/api/checklist/<int:file_id>', methods=['GET'])
+@login_required
+def get_checklist(file_id):
+    checklist_items = ChecklistItem.query.filter_by(client_file_id=file_id).all()
+    return jsonify([item.to_dict() for item in checklist_items])
+
+@current_app.route('/api/checklist/<int:item_id>', methods=['PUT'])
+@login_required
+def update_checklist_item(item_id):
+    item = ChecklistItem.query.get_or_404(item_id)
+    data = request.json
+    item.status = data['status']
+    db.session.commit()
+    return jsonify({'message': 'Checklist item updated successfully'})
+
+@current_app.route('/api/checklist/<int:file_id>/progress', methods=['GET'])
+@login_required
+def get_checklist_progress(file_id):
+    checklist_items = ChecklistItem.query.filter_by(client_file_id=file_id).all()
+    total_items = len(checklist_items)
+    completed_items = sum(1 for item in checklist_items if item.status == 'completed')
+    progress = (completed_items / total_items) * 100 if total_items > 0 else 0
+    return jsonify({'progress': progress})

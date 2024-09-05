@@ -73,6 +73,22 @@
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="{{ url_for('static', filename='client_files.js') }}"></script>
+    <div class="file-details">
+        <h2>File Details</h2>
+        <div class="details-content">
+            <!-- File details will be dynamically loaded here -->
+        </div>
+        <div class="checklist">
+            <h3>Checklist</h3>
+            <ul id="checklist-items">
+                <!-- Checklist items will be dynamically loaded here -->
+            </ul>
+            <div class="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
+            <span id="progress-percentage"></span>
+        </div>
+    </div>
 </body>
 
 </html>
