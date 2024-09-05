@@ -5,6 +5,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from flask import jsonify
+from datetime import datetime
 
 @current_app.route('/')
 def home():
@@ -125,29 +127,41 @@ def send_email_api():
 @login_required
 def profile():
     if request.method == 'POST':
-        if 'change_password' in request.form:
-            current_password = request.form['current_password']
-            new_password = request.form['new_password']
-            confirm_password = request.form['confirm_password']
-            
-            if not current_user.check_password(current_password):
-                flash('Current password is incorrect.', 'danger')
-            elif new_password != confirm_password:
-                flash('New passwords do not match.', 'danger')
-            else:
-                current_user.set_password(new_password)
-                db.session.commit()
-                flash('Password updated successfully.', 'success')
-        
-        elif 'change_email' in request.form:
-            new_email = request.form['new_email']
-            password = request.form['password']
-            
-            if not current_user.check_password(password):
-                flash('Password is incorrect.', 'danger')
-            else:
-                current_user.email = new_email
-                db.session.commit()
-                flash('Email updated successfully.', 'success')
-    
+        current_user.username = request.form['username']
+        current_user.email = request.form['email']
+        if request.form['password']:
+            current_user.set_password(request.form['password'])
+        db.session.commit()
+        flash('Your profile has been updated.')
+        return redirect(url_for('profile'))
     return render_template('profile.html')
+@current_app.route('/calendar')
+@login_required
+def calendar():
+    return render_template('calendar.html')
+
+@current_app.route('/api/events', methods=['GET', 'POST'])
+@login_required
+def events():
+    if request.method == 'POST':
+        data = request.json
+        event = Event(
+            title=data['title'],
+            start=datetime.fromisoformat(data['start']),
+            description=data.get('description', ''),
+            priority=data['priority'],
+            user_id=current_user.id
+        )
+        db.session.add(event)
+        db.session.commit()
+        return jsonify({'message': 'Event created successfully'}), 201
+    else:
+        date = request.args.get('date')
+        if date:
+            events = Event.query.filter(
+                Event.user_id == current_user.id,
+                Event.start.between(f"{date} 00:00:00", f"{date} 23:59:59")
+            ).all()
+        else:
+            events = Event.query.filter_by(user_id=current_user.id).all()
+        return jsonify([event.to_dict() for event in events])
