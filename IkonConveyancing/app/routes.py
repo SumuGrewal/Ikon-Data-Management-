@@ -120,3 +120,34 @@ def send_email_api():
         return jsonify({'message': 'Email sent successfully'})
     except Exception as e:
         return jsonify({'message': str(e)}), 500
+    
+@current_app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        if 'change_password' in request.form:
+            current_password = request.form['current_password']
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+            
+            if not current_user.check_password(current_password):
+                flash('Current password is incorrect.', 'danger')
+            elif new_password != confirm_password:
+                flash('New passwords do not match.', 'danger')
+            else:
+                current_user.set_password(new_password)
+                db.session.commit()
+                flash('Password updated successfully.', 'success')
+        
+        elif 'change_email' in request.form:
+            new_email = request.form['new_email']
+            password = request.form['password']
+            
+            if not current_user.check_password(password):
+                flash('Password is incorrect.', 'danger')
+            else:
+                current_user.email = new_email
+                db.session.commit()
+                flash('Email updated successfully.', 'success')
+    
+    return render_template('profile.html')
