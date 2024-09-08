@@ -75,7 +75,7 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@current_app.route('/api/templates', methods=['GET', 'POST'])
+@current_app.route('/api/templates', methods=['GET','POST'])
 @login_required
 def manage_templates():
     if request.method == 'POST':
