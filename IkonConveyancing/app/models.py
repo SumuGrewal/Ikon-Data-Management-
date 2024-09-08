@@ -54,6 +54,7 @@ class ClientFile(db.Model):
     address = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), nullable=False)
     settlement_date = db.Column(db.Date, nullable=False)
+    notes = db.Column(db.Text, nullable=True)
     checklist_items = db.relationship('ChecklistItem', backref='client_file', lazy=True)
 
     def to_dict(self):
@@ -63,7 +64,8 @@ class ClientFile(db.Model):
             'client_name': self.client_name,
             'address': self.address,
             'status': self.status,
-            'settlement_date': self.settlement_date.isoformat()
+            'settlement_date': self.settlement_date.isoformat(),
+            'notes': self.notes
         }
 
 class ChecklistItem(db.Model):

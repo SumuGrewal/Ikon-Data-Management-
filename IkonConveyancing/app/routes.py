@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, current_app, jsonify
 from IkonConveyancing.app import db
-from IkonConveyancing.app.models import User, EmailTemplate
+from IkonConveyancing.app.models import User, EmailTemplate, ClientFile
 from flask_login import login_user, logout_user, login_required, current_user
 import smtplib
 from email.mime.text import MIMEText
@@ -221,3 +221,18 @@ def get_checklist_progress(file_id):
     completed_items = sum(1 for item in checklist_items if item.status == 'completed')
     progress = (completed_items / total_items) * 100 if total_items > 0 else 0
     return jsonify({'progress': progress})
+
+@current_app.route('/api/client_files', methods=['POST'])
+@login_required
+def add_client_file():
+    data = request.json
+    new_file = ClientFile(
+        file_number=data['file_number'],
+        client_name=data['client_name'],
+        address=data['address'],
+        status=data['status'],
+        settlement_date=data['settlement_date']
+    )
+    db.session.add(new_file)
+    db.session.commit()
+    return jsonify({'message': 'Client file added successfully'}), 201
