@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import jsonify
 from datetime import datetime
+from twofactorauth import totp
 
 @current_app.route('/')
 def home():
@@ -20,9 +21,22 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user is None or not user.check_password(password):
             return render_template('goodbyeworld.html')
-        login_user(user)
-        return render_template('dashboard.html')
+        # Instead of logging in the user here, redirect to the 2FA page
+        return redirect(url_for('two_factor_auth', user_id=user.id))
     return render_template('login.html')
+
+@current_app.route('/two_factor_auth/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def two_factor_auth(user_id):
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        user_passcode = request.form['code']
+        if totp.verify(str(user_passcode)):  # Implement this function to verify the 2FA code
+            login_user(user)
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid 2FA code', 'error')
+    return render_template('two_factor_auth.html', user_id=user_id)
 
 @current_app.route('/register', methods=['GET', 'POST'])
 def register():
