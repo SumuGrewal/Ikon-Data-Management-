@@ -125,6 +125,42 @@ body {
     color: #162938;
 }
 
-/* .details-content {
-    /* Add styles for file details content */
-/* }
+.styled-button {
+    /* Add your button styling here */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.popup-form {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.popup-form h2 {
+    margin-top: 0;
+}
+
+.popup-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.popup-form label {
+    margin-top: 10px;
+}
+
+.popup-form input,
+.popup-form select,
+.popup-form button {
+    margin-top: 5px;
+}

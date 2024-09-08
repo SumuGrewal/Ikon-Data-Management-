@@ -1,12 +1,15 @@
 from flask import render_template, flash, redirect, url_for, request, current_app, jsonify
 from IkonConveyancing.app import db
-from IkonConveyancing.app.models import User, EmailTemplate
+from IkonConveyancing.app.models import User, EmailTemplate, ClientFile
 from flask_login import login_user, logout_user, login_required, current_user
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import jsonify
 from datetime import datetime
+from twofactorauth import totp
+import logging
+import os
 
 @current_app.route('/')
 def home():
@@ -20,9 +23,22 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user is None or not user.check_password(password):
             return render_template('goodbyeworld.html')
-        login_user(user)
-        return render_template('dashboard.html')
+        # Instead of logging in the user here, redirect to the 2FA page
+        return redirect(url_for('two_factor_auth', user_id=user.id))
     return render_template('login.html')
+
+@current_app.route('/two_factor_auth/<int:user_id>', methods=['GET', 'POST'])
+
+def two_factor_auth(user_id):
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        user_passcode = request.form['code']
+        if totp.verify(str(user_passcode)):  # Implement this function to verify the 2FA code
+            login_user(user)
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid 2FA code', 'error')
+    return render_template('two_factor_auth.html', user_id=user_id)
 
 @current_app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -59,7 +75,7 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@current_app.route('/api/templates', methods=['GET', 'POST'])
+@current_app.route('/api/templates', methods=['GET','POST'])
 @login_required
 def manage_templates():
     if request.method == 'POST':
@@ -208,6 +224,7 @@ def get_checklist_progress(file_id):
     progress = (completed_items / total_items) * 100 if total_items > 0 else 0
     return jsonify({'progress': progress})
 
+<<<<<<< HEAD
 @current_app.route('/client_files/<file_number>')
 @login_required
 def client_details(file_number):
@@ -251,3 +268,71 @@ def upload_file(file_number):
     file = request.files['file']
     # Save the file and update the database as needed
     return jsonify({'message': 'File uploaded successfully'})
+=======
+
+
+logging.basicConfig(level=logging.DEBUG)
+
+@current_app.route('/api/client_files', methods=['POST'])
+@login_required
+def add_client_file():
+    data = request.json
+    file_number = data['file_number']
+    logging.debug(f"Received file_number: {file_number}")
+    
+    existing_file = ClientFile.query.filter_by(file_number=file_number).first()
+    
+    if existing_file:
+        logging.debug(f"File number {file_number} already exists in the database.")
+        return jsonify({'message': f'File number {file_number} already exists'}), 400
+
+    try:
+        settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
+        new_file = ClientFile(
+            file_number=file_number,
+            client_name=data['client_name'],
+            address=data['address'],
+            status=data['status'],
+            settlement_date=settlement_date,
+            notes=data.get('notes')
+        )
+        db.session.add(new_file)
+        db.session.commit()
+        logging.debug(f"Client file with file_number {file_number} added successfully.")
+        return jsonify({'message': 'Client file added successfully'}), 201
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error adding client file: {str(e)}")
+        return jsonify({'message': str(e)}), 500
+    
+@current_app.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file:
+        file_number = request.form['fileNumber']
+        filename = f"{file_number}_{file.filename}"
+        file_path = os.path.join(current_app.root_path, filename)
+        file.save(file_path)
+        return jsonify({'message': 'File uploaded successfully', 'file_path': file_path}), 200
+    
+@current_app.route('/api/client_files/<int:id>', methods=['PUT'])
+@login_required
+def update_client_file(id):
+    data = request.json
+    client_file = ClientFile.query.get_or_404(id)
+    
+    client_file.file_number = data['file_number']
+    client_file.client_name = data['client_name']
+    client_file.address = data['address']
+    client_file.status = data['status']
+    client_file.settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
+    client_file.notes = data.get('notes', client_file.notes)
+    
+    db.session.commit()
+    return jsonify({'message': 'Client file updated successfully'})
+>>>>>>> 79194e9359de01a57ae8448a262765637a3bf63a
