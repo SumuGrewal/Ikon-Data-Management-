@@ -10,9 +10,7 @@ from twofactorauth import totp
 import logging
 import os
 
-@current_app.route('/')
-def home():
-    return render_template('index.html')
+import logging
 
 @current_app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -20,12 +18,20 @@ def login():
         email = request.form['email']
         password = request.form['password']
         user = User.query.filter_by(email=email).first()
-        if user is None or not user.check_password(password):
+        
+        if user is None:
+            logging.debug(f"User with email {email} not found.")
             return render_template('goodbyeworld.html')
+        
+        if not user.check_password(password):
+            logging.debug(f"Password for user with email {email} is incorrect.")
+            return render_template('goodbyeworld.html')
+        
         # Instead of logging in the user here, redirect to the 2FA page
+        logging.debug(f"User with email {email} found and password is correct. Redirecting to 2FA.")
         return redirect(url_for('two_factor_auth', user_id=user.id))
+    
     return render_template('login.html')
-
 @current_app.route('/two_factor_auth/<int:user_id>', methods=['GET', 'POST'])
 def two_factor_auth(user_id):
     user = User.query.get_or_404(user_id)
