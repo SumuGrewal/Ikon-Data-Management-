@@ -10,8 +10,6 @@ from twofactorauth import totp
 import logging
 import os
 
-import logging
-
 @current_app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -32,6 +30,7 @@ def login():
         return redirect(url_for('two_factor_auth', user_id=user.id))
     
     return render_template('login.html')
+
 @current_app.route('/two_factor_auth/<int:user_id>', methods=['GET', 'POST'])
 def two_factor_auth(user_id):
     user = User.query.get_or_404(user_id)
@@ -232,8 +231,12 @@ def client_details(file_number):
 @login_required
 def add_client_file():
     data = request.json
-    file_number = data['file_number']
+    file_number = data.get('file_number')
     logging.debug(f"Received file_number: {file_number}")
+    
+    if not file_number:
+        logging.debug("File number is missing in the request.")
+        return jsonify({'message': 'File number is required'}), 400
     
     existing_file = ClientFile.query.filter_by(file_number=file_number).first()
     
@@ -249,6 +252,8 @@ def add_client_file():
             address=data['address'],
             status=data['status'],
             settlement_date=settlement_date,
+            type_of_settlement=data['type_of_settlement'],
+            type_of_client=data['type_of_client'],
             notes=data.get('notes')
         )
         db.session.add(new_file)
@@ -286,6 +291,8 @@ def update_client_file(id):
     client_file.address = data['address']
     client_file.status = data['status']
     client_file.settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
+    client_file.type_of_settlement = data['type_of_settlement']
+    client_file.type_of_client = data['type_of_client']
     client_file.notes = data.get('notes', client_file.notes)
     
     db.session.commit()

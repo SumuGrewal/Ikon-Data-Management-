@@ -39,5 +39,5 @@ def createDatabase(app):
         with app.app_context():
             db.create_all()
         print(
-        "------------------------------------\ndatabase initialized and created \n------------------------------------\n2024. made with Ã¢ÂÂ¥ by khush\n"
+        "------------------------------------\ndatabase initialized and created \n------------------------------------\n2024. made with ÃÂ¢ÃÂÃÂ¥ by khush\n"
     )

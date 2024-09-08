@@ -37,15 +37,8 @@ class EmailTemplate(db.Model):
             'user_id': self.user_id
         }
 
-
     def __repr__(self):
         return f"EmailTemplate('{self.subject}', '{self.client_name}')"
-    
-
-
-from IkonConveyancing.app import db
-
-
 
 class ClientFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,6 +47,8 @@ class ClientFile(db.Model):
     address = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), nullable=False)
     settlement_date = db.Column(db.Date, nullable=False)
+    type_of_settlement = db.Column(db.String(50), nullable=False)  # New field
+    type_of_client = db.Column(db.String(50), nullable=False)  # New field
     notes = db.Column(db.Text, nullable=True)
     checklist_items = db.relationship('ChecklistItem', backref='client_file', lazy=True)
 
@@ -65,6 +60,8 @@ class ClientFile(db.Model):
             'address': self.address,
             'status': self.status,
             'settlement_date': self.settlement_date.isoformat(),
+            'type_of_settlement': self.type_of_settlement,
+            'type_of_client': self.type_of_client,
             'notes': self.notes
         }
 
