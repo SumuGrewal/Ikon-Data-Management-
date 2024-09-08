@@ -9,6 +9,7 @@ from flask import jsonify
 from datetime import datetime
 from twofactorauth import totp
 import logging
+import os
 
 @current_app.route('/')
 def home():
@@ -27,7 +28,7 @@ def login():
     return render_template('login.html')
 
 @current_app.route('/two_factor_auth/<int:user_id>', methods=['GET', 'POST'])
-@login_required
+
 def two_factor_auth(user_id):
     user = User.query.get_or_404(user_id)
     if request.method == 'POST':
@@ -258,3 +259,34 @@ def add_client_file():
         db.session.rollback()
         logging.error(f"Error adding client file: {str(e)}")
         return jsonify({'message': str(e)}), 500
+    
+@current_app.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file:
+        file_number = request.form['fileNumber']
+        filename = f"{file_number}_{file.filename}"
+        file_path = os.path.join(current_app.root_path, filename)
+        file.save(file_path)
+        return jsonify({'message': 'File uploaded successfully', 'file_path': file_path}), 200
+    
+@current_app.route('/api/client_files/<int:id>', methods=['PUT'])
+@login_required
+def update_client_file(id):
+    data = request.json
+    client_file = ClientFile.query.get_or_404(id)
+    
+    client_file.file_number = data['file_number']
+    client_file.client_name = data['client_name']
+    client_file.address = data['address']
+    client_file.status = data['status']
+    client_file.settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
+    client_file.notes = data.get('notes', client_file.notes)
+    
+    db.session.commit()
+    return jsonify({'message': 'Client file updated successfully'})

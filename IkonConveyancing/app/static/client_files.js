@@ -1,87 +1,62 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const addClientButton = document.getElementById('add-client-button');
-    const addClientPopup = document.getElementById('add-client-popup');
-    const addClientForm = document.getElementById('add-client-form');
-    const fileEntriesContainer = document.querySelector('.file-entries');
+document.addEventListener('DOMContentLoaded', () => {
+    const fileEntries = document.querySelectorAll('.file-entry');
+    const detailsContent = document.querySelector('.details-content');
+    const fileUpload = document.getElementById('file-upload');
+    const saveDetailsButton = document.getElementById('save-details');
 
-    // Show the add client popup
-    addClientButton.addEventListener('click', () => {
-        addClientPopup.style.display = 'block';
+    fileEntries.forEach(entry => {
+        entry.addEventListener('click', () => {
+            // Load file details into the details-content container
+            const fileNumber = entry.getAttribute('data-file-number');
+            const clientName = entry.querySelector('span:nth-child(2)').innerText;
+            const address = entry.querySelector('span:nth-child(3)').innerText;
+            const status = entry.querySelector('span:nth-child(4)').innerText;
+            const settlementDate = entry.querySelector('span:nth-child(5)').innerText;
+
+            detailsContent.innerHTML = `
+                <p>File Number: <span contenteditable="true">${fileNumber}</span></p>
+                <p>Client Name: <span contenteditable="true">${clientName}</span></p>
+                <p>Address: <span contenteditable="true">${address}</span></p>
+                <p>Status: <span contenteditable="true">${status}</span></p>
+                <p>Settlement Date: <span contenteditable="true">${settlementDate}</span></p>
+            `;
+
+            // Clear previous file upload
+            fileUpload.value = '';
+        });
     });
 
-    // Hide the add client popup
-    document.getElementById('cancel-button').addEventListener('click', () => {
-        addClientPopup.style.display = 'none';
-    });
-
-    // Handle form submission
-    addClientForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const formData = new FormData(addClientForm);
-        const data = {
-            file_number: formData.get('file-number'),
-            client_name: formData.get('client-name'),
-            address: formData.get('address'),
-            status: formData.get('status'),
-            settlement_date: formData.get('settlement-date')
+    saveDetailsButton.addEventListener('click', () => {
+        // Save the edited details and handle file upload
+        const editedDetails = {
+            fileNumber: detailsContent.querySelector('p:nth-child(1) span').innerText,
+            clientName: detailsContent.querySelector('p:nth-child(2) span').innerText,
+            address: detailsContent.querySelector('p:nth-child(3) span').innerText,
+            status: detailsContent.querySelector('p:nth-child(4) span').innerText,
+            settlementDate: detailsContent.querySelector('p:nth-child(5) span').innerText,
         };
 
-        try {
-            const response = await fetch('/api/client_files', {
+        const file = fileUpload.files[0];
+        if (file) {
+            // Handle file upload
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('fileNumber', editedDetails.fileNumber);
+
+            fetch('/upload', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('File uploaded successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error uploading file:', error);
             });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log(result.message);
-                addClientPopup.style.display = 'none';
-                addClientForm.reset();
-                fetchClientFiles(); // Fetch and display the updated list of client files
-            } else {
-                const error = await response.json();
-                console.error(error.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
         }
+
+        // Save the edited details (this is just a placeholder, you need to implement the actual save logic)
+        console.log('Edited details:', editedDetails);
     });
-
-    // Fetch and display client files
-    async function fetchClientFiles() {
-        try {
-            const response = await fetch('/api/client_files');
-            const clientFiles = await response.json();
-
-            // Clear the existing entries
-            fileEntriesContainer.innerHTML = '';
-
-            // Populate the container with the updated client files
-            clientFiles.forEach(file => {
-                const fileEntry = document.createElement('div');
-                fileEntry.classList.add('file-entry');
-                fileEntry.dataset.fileNumber = file.file_number;
-                fileEntry.dataset.status = file.status;
-
-                fileEntry.innerHTML = `
-                    <span>File Number: ${file.file_number}</span>
-                    <span>Client Name: ${file.client_name}</span>
-                    <span>Address: ${file.address}</span>
-                    <span>Status: ${file.status}</span>
-                    <span>Settlement Date: ${file.settlement_date}</span>
-                `;
-
-                fileEntriesContainer.appendChild(fileEntry);
-            });
-        } catch (error) {
-            console.error('Error fetching client files:', error);
-        }
-    }
-
-    // Initial fetch of client files
-    fetchClientFiles();
 });
