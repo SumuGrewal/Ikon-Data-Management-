@@ -2,61 +2,86 @@ document.addEventListener('DOMContentLoaded', function() {
     const addClientButton = document.getElementById('add-client-button');
     const addClientPopup = document.getElementById('add-client-popup');
     const addClientForm = document.getElementById('add-client-form');
-    const cancelButton = document.getElementById('cancel-button');
+    const fileEntriesContainer = document.querySelector('.file-entries');
 
-    addClientButton.addEventListener('click', function() {
+    // Show the add client popup
+    addClientButton.addEventListener('click', () => {
         addClientPopup.style.display = 'block';
     });
 
-    cancelButton.addEventListener('click', function() {
+    // Hide the add client popup
+    document.getElementById('cancel-button').addEventListener('click', () => {
         addClientPopup.style.display = 'none';
-        addClientForm.reset();
     });
 
-    addClientForm.addEventListener('submit', function(event) {
+    // Handle form submission
+    addClientForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        
-        const formData = new FormData(addClientForm);
-        const clientData = Object.fromEntries(formData.entries());
 
-        fetch('/api/client_files', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(clientData),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const newEntry = createClientEntry(clientData);
-                document.querySelector('.file-entries').appendChild(newEntry);
+        const formData = new FormData(addClientForm);
+        const data = {
+            file_number: formData.get('file-number'),
+            client_name: formData.get('client-name'),
+            address: formData.get('address'),
+            status: formData.get('status'),
+            settlement_date: formData.get('settlement-date')
+        };
+
+        try {
+            const response = await fetch('/api/client_files', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(result.message);
                 addClientPopup.style.display = 'none';
                 addClientForm.reset();
+                fetchClientFiles(); // Fetch and display the updated list of client files
             } else {
-                alert('Error adding client: ' + data.message);
+                const error = await response.json();
+                console.error(error.message);
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred while adding the client.');
-        });
+        }
     });
 
-    function createClientEntry(clientData) {
-        const newEntry = document.createElement('div');
-        newEntry.classList.add('file-entry');
-        newEntry.dataset.fileNumber = clientData['file-number'];
-        newEntry.dataset.status = clientData.status;
-        newEntry.innerHTML = `
-            <span>File Number: ${clientData['file-number']}</span>
-            <span>Client Name: ${clientData['client-name']}</span>
-            <span>Address: ${clientData.address}</span>
-            <span>Status: ${clientData.status}</span>
-            <span>Settlement Date: ${clientData['settlement-date']}</span>
-        `;
-        return newEntry;
+    // Fetch and display client files
+    async function fetchClientFiles() {
+        try {
+            const response = await fetch('/api/client_files');
+            const clientFiles = await response.json();
+
+            // Clear the existing entries
+            fileEntriesContainer.innerHTML = '';
+
+            // Populate the container with the updated client files
+            clientFiles.forEach(file => {
+                const fileEntry = document.createElement('div');
+                fileEntry.classList.add('file-entry');
+                fileEntry.dataset.fileNumber = file.file_number;
+                fileEntry.dataset.status = file.status;
+
+                fileEntry.innerHTML = `
+                    <span>File Number: ${file.file_number}</span>
+                    <span>Client Name: ${file.client_name}</span>
+                    <span>Address: ${file.address}</span>
+                    <span>Status: ${file.status}</span>
+                    <span>Settlement Date: ${file.settlement_date}</span>
+                `;
+
+                fileEntriesContainer.appendChild(fileEntry);
+            });
+        } catch (error) {
+            console.error('Error fetching client files:', error);
+        }
     }
 
-    // ... (keep the existing code for filters and other functionality)
+    // Initial fetch of client files
+    fetchClientFiles();
 });

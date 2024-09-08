@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from flask import jsonify
 from datetime import datetime
 from twofactorauth import totp
+import logging
 
 @current_app.route('/')
 def home():
@@ -222,17 +223,38 @@ def get_checklist_progress(file_id):
     progress = (completed_items / total_items) * 100 if total_items > 0 else 0
     return jsonify({'progress': progress})
 
+
+
+logging.basicConfig(level=logging.DEBUG)
+
 @current_app.route('/api/client_files', methods=['POST'])
 @login_required
 def add_client_file():
     data = request.json
-    new_file = ClientFile(
-        file_number=data['file_number'],
-        client_name=data['client_name'],
-        address=data['address'],
-        status=data['status'],
-        settlement_date=data['settlement_date']
-    )
-    db.session.add(new_file)
-    db.session.commit()
-    return jsonify({'message': 'Client file added successfully'}), 201
+    file_number = data['file_number']
+    logging.debug(f"Received file_number: {file_number}")
+    
+    existing_file = ClientFile.query.filter_by(file_number=file_number).first()
+    
+    if existing_file:
+        logging.debug(f"File number {file_number} already exists in the database.")
+        return jsonify({'message': f'File number {file_number} already exists'}), 400
+
+    try:
+        settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
+        new_file = ClientFile(
+            file_number=file_number,
+            client_name=data['client_name'],
+            address=data['address'],
+            status=data['status'],
+            settlement_date=settlement_date,
+            notes=data.get('notes')
+        )
+        db.session.add(new_file)
+        db.session.commit()
+        logging.debug(f"Client file with file_number {file_number} added successfully.")
+        return jsonify({'message': 'Client file added successfully'}), 201
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error adding client file: {str(e)}")
+        return jsonify({'message': str(e)}), 500

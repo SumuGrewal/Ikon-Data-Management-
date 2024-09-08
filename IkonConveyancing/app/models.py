@@ -49,7 +49,7 @@ from IkonConveyancing.app import db
 
 class ClientFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    file_number = db.Column(db.String(20), unique=True, nullable=False)
+    file_number = db.Column(db.String(20), unique=False, nullable=False)
     client_name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), nullable=False)
