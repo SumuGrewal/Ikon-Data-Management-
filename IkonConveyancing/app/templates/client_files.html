@@ -7,6 +7,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Files - Ikon Conveyancing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='ClientFiles/style.css') }}">
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -43,6 +81,7 @@
                     <input type="text" id="property-address" placeholder="Enter address">
                     <button id="apply-filters">Apply Filters</button>
                     <button id="clear-filters">Clear Filters</button>
+                    <button id="add-client">Add Client</button>
                 </div>
                 <div class="file-entries">
                     <div class="file-entry" data-file-number="BS0624" data-status="pending">
@@ -70,25 +109,30 @@
         </main>
     </div>
 
+    <!-- Modal for adding a new client -->
+    <div id="addClientModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Client</h2>
+            <form id="add-client-form">
+                <label for="file-number">File Number:</label>
+                <input type="text" id="file-number" name="file-number" required><br>
+                <label for="client-name">Client Name:</label>
+                <input type="text" id="client-name" name="client-name" required><br>
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" required><br>
+                <label for="status">Status:</label>
+                <input type="text" id="status" name="status" required><br>
+                <label for="settlement-date">Settlement Date (dd-mm-yyyy):</label>
+                <input type="text" id="settlement-date" name="settlement-date" required><br>
+                <button type="submit">Add Client</button>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="{{ url_for('static', filename='client_files.js') }}"></script>
-    <div class="file-details">
-        <h2>File Details</h2>
-        <div class="details-content">
-            <!-- File details will be dynamically loaded here -->
-        </div>
-        <div class="checklist">
-            <h3>Checklist</h3>
-            <ul id="checklist-items">
-                <!-- Checklist items will be dynamically loaded here -->
-            </ul>
-            <div class="progress-bar">
-                <div id="progress-fill"></div>
-            </div>
-            <span id="progress-percentage"></span>
-        </div>
-    </div>
 </body>
 
 </html>

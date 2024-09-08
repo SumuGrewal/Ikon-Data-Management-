@@ -207,3 +207,47 @@ def get_checklist_progress(file_id):
     completed_items = sum(1 for item in checklist_items if item.status == 'completed')
     progress = (completed_items / total_items) * 100 if total_items > 0 else 0
     return jsonify({'progress': progress})
+
+@current_app.route('/client_files/<file_number>')
+@login_required
+def client_details(file_number):
+    client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
+    return render_template('client_details.html', client_file=client_file)
+
+@current_app.route('/api/client_files', methods=['POST'])
+def add_client_file():
+    data = request.get_json()
+    file_number = data.get('file_number')
+    client_name = data.get('client_name')
+    address = data.get('address')
+    status = data.get('status')
+    settlement_date = data.get('settlement_date')
+
+    # Add logic to save the client file to the database
+    # For example:
+    new_client_file = ClientFile(file_number=file_number, client_name=client_name, address=address, status=status, settlement_date=settlement_date)
+    db.session.add(new_client_file)
+    db.session.commit()
+
+    return jsonify({'message': 'Client file added successfully'}), 201
+
+
+@current_app.route('/api/client_files/<file_number>', methods=['PUT'])
+@login_required
+def update_client_file(file_number):
+    client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
+    data = request.json
+    client_file.client_name = data['client_name']
+    client_file.address = data['address']
+    client_file.status = data['status']
+    client_file.settlement_date = datetime.strptime(data['settlement_date'], '%d-%m-%Y')
+    db.session.commit()
+    return jsonify({'message': 'Client file updated successfully'})
+
+@current_app.route('/api/client_files/<file_number>/upload', methods=['POST'])
+@login_required
+def upload_file(file_number):
+    client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
+    file = request.files['file']
+    # Save the file and update the database as needed
+    return jsonify({'message': 'File uploaded successfully'})
