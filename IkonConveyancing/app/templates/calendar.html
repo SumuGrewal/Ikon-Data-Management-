@@ -46,4 +46,46 @@
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: '/api/events',
+            dateClick: function(info) {
+                // Handle date click event
+            }
+        });
+        calendar.render();
+    
+        document.getElementById('add-event-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var title = document.getElementById('event-title').value;
+            var start = document.getElementById('event-datetime').value;
+            var description = document.getElementById('event-description').value;
+            var priority = document.getElementById('event-priority').value;
+    
+            fetch('/api/events', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    start: start,
+                    description: description,
+                    priority: priority
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Event created successfully') {
+                    calendar.refetchEvents();
+                } else {
+                    alert('Error creating event');
+                }
+            });
+        });
+    });
+    </script>
 </html>
