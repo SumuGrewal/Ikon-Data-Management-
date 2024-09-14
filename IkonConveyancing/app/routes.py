@@ -9,8 +9,13 @@ from datetime import datetime
 from twofactorauth import totp
 import logging
 import os
+from .models import Event
 
+@current_app.route('/')
+def index():
+    return render_template('index.html')
 @current_app.route('/login', methods=['GET', 'POST'])
+
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -19,11 +24,11 @@ def login():
         
         if user is None:
             logging.debug(f"User with email {email} not found.")
-            return render_template('goodbyeworld.html')
+            return render_template('wrongpassword.html')
         
         if not user.check_password(password):
             logging.debug(f"Password for user with email {email} is incorrect.")
-            return render_template('goodbyeworld.html')
+            return render_template('wrongpassword.html')
         
         # Instead of logging in the user here, redirect to the 2FA page
         logging.debug(f"User with email {email} found and password is correct. Redirecting to 2FA.")
@@ -165,6 +170,7 @@ def calendar():
 def events():
     if request.method == 'POST':
         data = request.json
+        # Ensure 'start' is correctly formatted and all required fields are present
         event = Event(
             title=data['title'],
             start=datetime.fromisoformat(data['start']),
@@ -174,18 +180,23 @@ def events():
         )
         db.session.add(event)
         db.session.commit()
+
         return jsonify({'message': 'Event created successfully'}), 201
-    else:
+
+    elif request.method == 'GET':
+        # Handle getting events by date, e.g., filtering by a specific day
         date = request.args.get('date')
         if date:
             events = Event.query.filter(
                 Event.user_id == current_user.id,
                 Event.start.between(f"{date} 00:00:00", f"{date} 23:59:59")
             ).all()
-        else:
-            events = Event.query.filter_by(user_id=current_user.id).all()
-        return jsonify([event.to_dict() for event in events])
 
+            # Use the to_dict method you defined to serialize events
+            events_data = [event.to_dict() for event in events]
+            return jsonify(events_data), 200
+        else:
+            return jsonify({'message': 'Date parameter is missing'}), 400
 @current_app.route('/checklist')
 @login_required
 def checklist():

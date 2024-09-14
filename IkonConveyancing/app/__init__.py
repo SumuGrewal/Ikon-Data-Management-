@@ -12,6 +12,8 @@ def createApp():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'qwerty'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_name}'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Disable the warning
+
     db.init_app(app)
    
     migrate = Migrate(app, db)  # initialize flask-migrate here
@@ -39,5 +41,8 @@ def createDatabase(app):
         with app.app_context():
             db.create_all()
         print(
-        "------------------------------------\ndatabase initialized and created \n------------------------------------\n2024. made with ÃÂ¢ÃÂÃÂ¥ by khush\n"
-    )
+         "------------------------------------\n"
+            "database initialized and created \n"
+            "------------------------------------\n"
+            "2024. made with 💖 by khush\n"
+        )
