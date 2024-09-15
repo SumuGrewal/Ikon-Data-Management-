@@ -1,5 +1,3 @@
-<!-- /IkonConveyancing/app/templates/client_files.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -190,7 +188,33 @@
                 .catch(error => console.error('Error:', error));
             }
         }
+
+        // Fetch and display client files
+        function fetchClientFiles() {
+            fetch('/api/client_files')
+                .then(response => response.json())
+                .then(data => {
+                    const fileEntries = document.getElementById('file-entries');
+                    fileEntries.innerHTML = '';
+                    data.forEach(file => {
+                        const fileEntry = document.createElement('div');
+                        fileEntry.className = 'file-entry';
+                        fileEntry.innerHTML = `
+                            <p>File Number: ${file.file_number}</p>
+                            <p>Client Name: ${file.client_name}</p>
+                            <p>Address: ${file.address}</p>
+                            <p>Status: ${file.status}</p>
+                            <p>Settlement Date: ${file.settlement_date}</p>
+                            <button onclick="deleteClientFile(${file.file_number})">Delete</button>
+                        `;
+                        fileEntries.appendChild(fileEntry);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Call fetchClientFiles on page load
+        document.addEventListener('DOMContentLoaded', fetchClientFiles);
     </script>
 </body>
 </html>
-

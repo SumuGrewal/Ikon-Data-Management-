@@ -82,8 +82,20 @@ def send_email():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+@current_app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        current_user.username = request.form['username']
+        current_user.email = request.form['email']
+        if request.form['password']:
+            current_user.set_password(request.form['password'])
+        db.session.commit()
+        flash('Your profile has been updated.')
+        return redirect(url_for('profile'))
+    return render_template('profile.html')
 
-@current_app.route('/api/templates', methods=['GET','POST'])
+@current_app.route('/api/templates', methods=['GET', 'POST'])
 @login_required
 def manage_templates():
     if request.method == 'POST':
@@ -103,11 +115,13 @@ def manage_templates():
         templates = EmailTemplate.query.filter_by(user_id=current_user.id).all()
         return jsonify([template.to_dict() for template in templates])
 
-@current_app.route('/api/templates/<int:id>', methods=['PUT', 'DELETE'])
+@current_app.route('/api/templates/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def update_delete_template(id):
     template = EmailTemplate.query.get_or_404(id)
-    if request.method == 'PUT':
+    if request.method == 'GET':
+        return jsonify(template.to_dict())
+    elif request.method == 'PUT':
         data = request.json
         template.subject = data['subject']
         template.settlement_date = data['settlement_date']
@@ -139,26 +153,13 @@ def send_email_api():
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
-        server.login('your-email@gmail.com', 'your-password')
+        server.login('sumu.grewal@gmail.com', '12345')
         text = msg.as_string()
-        server.sendmail('your-email@gmail.com', recipient, text)
+        server.sendmail('sumu.grewal@gmail.com', recipient, text)
         server.quit()
         return jsonify({'message': 'Email sent successfully'})
     except Exception as e:
         return jsonify({'message': str(e)}), 500
-    
-@current_app.route('/profile', methods=['GET', 'POST'])
-@login_required
-def profile():
-    if request.method == 'POST':
-        current_user.username = request.form['username']
-        current_user.email = request.form['email']
-        if request.form['password']:
-            current_user.set_password(request.form['password'])
-        db.session.commit()
-        flash('Your profile has been updated.')
-        return redirect(url_for('profile'))
-    return render_template('profile.html')
 
 @current_app.route('/calendar')
 @login_required
@@ -238,6 +239,7 @@ def client_details(file_number):
     client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
     return render_template('client_details.html', client_file=client_file)
 
+
 @current_app.route('/api/client_files', methods=['POST'])
 @login_required
 def add_client_file():
@@ -270,27 +272,27 @@ def add_client_file():
         db.session.add(new_file)
         db.session.commit()
         logging.debug(f"Client file with file_number {file_number} added successfully.")
-        return jsonify({'message': 'Client file added successfully'}), 201
+        return jsonify(new_file.to_dict()), 201
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error adding client file: {str(e)}")
         return jsonify({'message': str(e)}), 500
 
-@current_app.route('/upload', methods=['POST'])
+@current_app.route('/api/client_files/<int:file_id>/upload', methods=['POST'])
 @login_required
-def upload_file():
+def upload_client_file(file_id):
+    client_file = ClientFile.query.get_or_404(file_id)
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     if file:
-        file_number = request.form['fileNumber']
-        filename = f"{file_number}_{file.filename}"
-        file_path = os.path.join(current_app.root_path, filename)
+        filename = f"{client_file.file_number}_{file.filename}"
+        file_path = os.path.join(current_app.root_path, 'uploads', filename)
         file.save(file_path)
+        # Save file path to the database if needed
         return jsonify({'message': 'File uploaded successfully', 'file_path': file_path}), 200
-
 @current_app.route('/api/client_files/<int:id>', methods=['PUT'])
 @login_required
 def update_client_file(id):
