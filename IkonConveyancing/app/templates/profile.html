@@ -5,53 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='Profile/style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
 </head>
 <body>
     <div class="container">
         <nav class="navigation">
-            <ul>
-                <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
-                <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
-                <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
-                <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li><a href="#"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
-                <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
-                <li class="active"><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
+                <li class="nav-item active"><a class="nav-link" href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
             </ul>
         </nav>
         <div class="profile-content">
-            <div class="profile-header">
+            <div class="profile-header d-flex align-items-center">
                 <div class="profile-picture">
-                    <img src="https://via.placeholder.com/100" alt="Profile Picture">
+                    <img src="https://via.placeholder.com/100" alt="Profile Picture" class="rounded-circle">
                 </div>
-                <div class="profile-info">
+                <div class="profile-info ml-3">
                     <h2>{{ current_user.username }}</h2>
                     <p>{{ current_user.email }}</p>
                 </div>
             </div>
-            <div class="profile-details">
+            <div class="profile-details mt-4">
                 <h3>Personal Information</h3>
-                <form action="{{ url_for('profile') }}" method="POST">
+                <form action="{{ url_for('profile') }}" method="POST" class="needs-validation" novalidate>
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+                        <input type="text" id="username" name="username" class="form-control" value="{{ current_user.username }}" required>
+                        <div class="invalid-feedback">Please enter a username.</div>
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password">
+                        <input type="password" id="password" name="password" class="form-control">
                     </div>
-                    <button type="submit" class="btn">Update Profile</button>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
                 </form>
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
 </body>
 </html>

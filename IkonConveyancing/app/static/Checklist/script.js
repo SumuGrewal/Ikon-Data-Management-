@@ -1,41 +1,57 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Fetch client files and populate the file list
+    const fileList = document.getElementById('file-list');
+    const checklistItems = document.getElementById('checklist-items');
+    const selectedFile = document.getElementById('selected-file');
+    const progressBar = document.getElementById('progress-bar');
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercentage = document.getElementById('progress-percentage');
+
+    // Fetch and display the list of files
     fetch('/api/client_files')
         .then(response => response.json())
         .then(files => {
-            const fileList = document.getElementById('file-list');
             files.forEach(file => {
                 const li = document.createElement('li');
                 li.textContent = file.file_number;
-                li.addEventListener('click', () => loadChecklist(file.id));
+                li.addEventListener('click', () => loadChecklist(file.id, file.file_number));
                 fileList.appendChild(li);
             });
         });
 
-    function loadChecklist(fileId) {
+    // Load checklist for the selected file
+    function loadChecklist(fileId, fileNumber) {
+        selectedFile.textContent = fileNumber;
+        checklistItems.innerHTML = '';
         fetch(`/api/checklist/${fileId}`)
             .then(response => response.json())
-            .then(checklistItems => {
-                const checklist = document.getElementById('checklist-items');
-                checklist.innerHTML = ''; // Clear existing items
-                checklistItems.forEach(item => {
+            .then(items => {
+                items.forEach(item => {
                     const li = document.createElement('li');
                     li.textContent = item.description;
-                    checklist.appendChild(li);
+                    li.addEventListener('click', () => displayItemDetails(item));
+                    checklistItems.appendChild(li);
                 });
-                document.getElementById('selected-file').textContent = fileId;
                 updateProgress(fileId);
             });
     }
 
+    // Display checklist item details
+    function displayItemDetails(item) {
+        alert(`Details for item: ${item.description}\nStatus: ${item.status}`);
+    }
+
+    // Update progress bar
     function updateProgress(fileId) {
         fetch(`/api/checklist/${fileId}/progress`)
             .then(response => response.json())
             .then(data => {
-                const progressFill = document.getElementById('progress-fill');
-                const progressPercentage = document.getElementById('progress-percentage');
                 progressFill.style.width = `${data.progress}%`;
                 progressPercentage.textContent = `${data.progress}%`;
             });
     }
+
+    // Display progress details
+    progressBar.addEventListener('click', () => {
+        alert(`Progress details: ${progressPercentage.textContent}`);
+    });
 });

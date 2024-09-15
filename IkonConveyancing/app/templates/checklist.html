@@ -5,6 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist - Ikon Conveyancing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='Checklist/style.css') }}">
+    <style>
+        /* Add your styles here */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            margin-top: 20px;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0;
+        }
+
+        #progress-percentage {
+            margin-top: 10px;
+            display: block;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -14,7 +73,7 @@
                 <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
                 <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
                 <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li class="active"><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
                 <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
                 <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
             </ul>
@@ -25,6 +84,7 @@
                 <ul id="file-list">
                     <!-- File list will be dynamically populated here -->
                 </ul>
+                <button id="add-file-button">Add File</button>
             </div>
             <div class="checklist">
                 <h2>Checklist for <span id="selected-file"></span></h2>
@@ -38,8 +98,107 @@
             </div>
         </main>
     </div>
+
+    <!-- Modal for adding a new file -->
+    <div id="addFileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add File</h2>
+            <form id="add-file-form">
+                <label for="file-number">File Number:</label>
+                <input type="text" id="file-number" name="file-number" required><br>
+                <button type="submit">Add File</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for updating checklist items -->
+    <div id="updateChecklistModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Update Checklist</h2>
+            <form id="update-checklist-form">
+                <label><input type="checkbox" name="checklist-item" value="Got the files"> Got the files</label><br>
+                <label><input type="checkbox" name="checklist-item" value="IDs got identity verification"> IDs got identity verification</label><br>
+                <label><input type="checkbox" name="checklist-item" value="Settlement date is set"> Settlement date is set</label><br>
+                <label><input type="checkbox" name="checklist-item" value="Loan is ready"> Loan is ready</label><br>
+                <label><input type="checkbox" name="checklist-item" value="Finances are final"> Finances are final</label><br>
+                <label><input type="checkbox" name="checklist-item" value="Settlement done"> Settlement done</label><br>
+                <button type="submit">Update Checklist</button>
+            </form>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='checklist/script.js') }}"></script>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script>
+        document.getElementById('add-file-button').addEventListener('click', function() {
+            document.getElementById('addFileModal').style.display = 'block';
+        });
+
+        document.querySelectorAll('.close').forEach(function(element) {
+            element.addEventListener('click', function() {
+                element.closest('.modal').style.display = 'none';
+            });
+        });
+
+        document.getElementById('add-file-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            fetch('/api/client_files', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Client file added successfully') {
+                    location.reload();
+                } else {
+                    alert('Error adding client file: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('update-checklist-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const checklistItems = formData.getAll('checklist-item');
+            const fileId = document.getElementById('selected-file').dataset.fileId;
+            fetch(`/api/checklist/${fileId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ checklist_items: checklistItems })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Checklist updated successfully') {
+                    updateProgressBar(fileId);
+                } else {
+                    alert('Error updating checklist: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        function updateProgressBar(fileId) {
+            fetch(`/api/checklist/${fileId}/progress`)
+            .then(response => response.json())
+            .then(data => {
+                const progressFill = document.getElementById('progress-fill');
+                const progressPercentage = document.getElementById('progress-percentage');
+                progressFill.style.width = `${data.progress}%`;
+                progressPercentage.textContent = `${data.progress}%`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 </body>
 </html>
