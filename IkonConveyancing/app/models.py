@@ -47,6 +47,8 @@ class ClientFile(db.Model):
     address = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), nullable=False)
     settlement_date = db.Column(db.Date, nullable=False)
+    type_of_settlement = db.Column(db.String(50), nullable=False)  # Add this line
+    type_of_client = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
     checklist_items = db.relationship('ChecklistItem', backref='client_file', lazy=True)
 

@@ -71,53 +71,6 @@ def dashboard():
 @login_required
 def client_files():
     return render_template('client_files.html')
-@current_app.route('/api/client_files', methods=['GET'])
-@login_required
-def get_client_files():
-    files = ClientFile.query.all()
-    return jsonify([file.to_dict() for file in files])
-
-@current_app.route('/api/client_files', methods=['POST'])
-@login_required
-def add_client_file():
-    data = request.json
-    file_number = data.get('file_number')
-    logging.debug(f"Received file_number: {file_number}")
-    
-    if not file_number:
-        logging.debug("File number is missing in the request.")
-        return jsonify({'message': 'File number is required'}), 400
-    
-    existing_file = ClientFile.query.filter_by(file_number=file_number).first()
-    
-    if existing_file:
-        logging.debug(f"File number {file_number} already exists in the database.")
-        return jsonify({'message': f'File number {file_number} already exists'}), 400
-
-    try:
-        settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
-        new_file = ClientFile(
-            file_number=file_number,
-            client_name=data['client_name'],
-            address=data['address'],
-            status=data['status'],
-            settlement_date=settlement_date,
-            type_of_settlement=data['type_of_settlement'],
-            type_of_client=data['type_of_client'],
-            notes=data.get('notes')
-        )
-        db.session.add(new_file)
-        db.session.commit()
-        return jsonify({'message': 'Client file added successfully'}), 201
-    except Exception as e:
-        logging.error(f"Error adding client file: {e}")
-        return jsonify({'message': 'Error adding client file'}), 500
-
-@current_app.route('/client_files/<file_number>')
-@login_required
-def client_details(file_number):
-    client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
-    return render_template('client_details.html', client_file=client_file)
 
 @current_app.route('/send_email')
 @login_required
@@ -130,20 +83,7 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@current_app.route('/profile', methods=['GET', 'POST'])
-@login_required
-def profile():
-    if request.method == 'POST':
-        current_user.username = request.form['username']
-        current_user.email = request.form['email']
-        if request.form['password']:
-            current_user.set_password(request.form['password'])
-        db.session.commit()
-        flash('Your profile has been updated.')
-        return redirect(url_for('profile'))
-    return render_template('profile.html')
-
-@current_app.route('/api/templates', methods=['GET', 'POST'])
+@current_app.route('/api/templates', methods=['GET','POST'])
 @login_required
 def manage_templates():
     if request.method == 'POST':
@@ -163,13 +103,11 @@ def manage_templates():
         templates = EmailTemplate.query.filter_by(user_id=current_user.id).all()
         return jsonify([template.to_dict() for template in templates])
 
-@current_app.route('/api/templates/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@current_app.route('/api/templates/<int:id>', methods=['PUT', 'DELETE'])
 @login_required
 def update_delete_template(id):
     template = EmailTemplate.query.get_or_404(id)
-    if request.method == 'GET':
-        return jsonify(template.to_dict())
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         data = request.json
         template.subject = data['subject']
         template.settlement_date = data['settlement_date']
@@ -201,13 +139,26 @@ def send_email_api():
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
-        server.login('sumu.grewal@gmail.com', '12345')
+        server.login('your-email@gmail.com', 'your-password')
         text = msg.as_string()
-        server.sendmail('sumu.grewal@gmail.com', recipient, text)
+        server.sendmail('your-email@gmail.com', recipient, text)
         server.quit()
         return jsonify({'message': 'Email sent successfully'})
     except Exception as e:
         return jsonify({'message': str(e)}), 500
+    
+@current_app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        current_user.username = request.form['username']
+        current_user.email = request.form['email']
+        if request.form['password']:
+            current_user.set_password(request.form['password'])
+        db.session.commit()
+        flash('Your profile has been updated.')
+        return redirect(url_for('profile'))
+    return render_template('profile.html')
 
 @current_app.route('/calendar')
 @login_required
@@ -252,46 +203,26 @@ def events():
 def checklist():
     return render_template('checklist.html')
 
-@current_app.route('/api/client_files', methods=['POST'])
+@current_app.route('/api/client_files', methods=['GET'])
 @login_required
-def add_client_file():
-    data = request.json
-    file_number = data.get('file_number')
-    if not file_number:
-        return jsonify({'message': 'File number is required'}), 400
+def get_client_files():
+    files = ClientFile.query.all()
+    return jsonify([file.to_dict() for file in files])
 
-    existing_file = ClientFile.query.filter_by(file_number=file_number).first()
-    if existing_file:
-        return jsonify({'message': f'File number {file_number} already exists'}), 400
-
-    new_file = ClientFile(
-        file_number=file_number,
-        client_name='',
-        address='',
-        status='pending',
-        settlement_date=None,
-        notes=''
-    )
-    db.session.add(new_file)
-    db.session.commit()
-
-    return jsonify({'message': 'Client file added successfully'}), 201
-
-@current_app.route('/api/checklist/<int:file_id>', methods=['PUT'])
+@current_app.route('/api/checklist/<int:file_id>', methods=['GET'])
 @login_required
-def update_checklist(file_id):
+def get_checklist(file_id):
+    checklist_items = ChecklistItem.query.filter_by(client_file_id=file_id).all()
+    return jsonify([item.to_dict() for item in checklist_items])
+
+@current_app.route('/api/checklist/<int:item_id>', methods=['PUT'])
+@login_required
+def update_checklist_item(item_id):
+    item = ChecklistItem.query.get_or_404(item_id)
     data = request.json
-    checklist_items = data.get('checklist_items', [])
-    ChecklistItem.query.filter_by(client_file_id=file_id).delete()
-    for item in checklist_items:
-        new_item = ChecklistItem(
-            client_file_id=file_id,
-            description=item,
-            status='completed'
-        )
-        db.session.add(new_item)
+    item.status = data['status']
     db.session.commit()
-    return jsonify({'message': 'Checklist updated successfully'})
+    return jsonify({'message': 'Checklist item updated successfully'})
 
 @current_app.route('/api/checklist/<int:file_id>/progress', methods=['GET'])
 @login_required
@@ -308,10 +239,9 @@ def client_details(file_number):
     client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
     return render_template('client_details.html', client_file=client_file)
 
-# Rename this function to avoid conflict
-@current_app.route('/api/client_files/add', methods=['POST'])
+@current_app.route('/api/client_files', methods=['POST'])
 @login_required
-def add_new_client_file():
+def add_client_file():
     data = request.json
     file_number = data.get('file_number')
     logging.debug(f"Received file_number: {file_number}")
@@ -329,7 +259,7 @@ def add_new_client_file():
     try:
         settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
         new_file = ClientFile(
-            file_number=file_number,
+            file_number=['file_number'],
             client_name=data['client_name'],
             address=data['address'],
             status=data['status'],
@@ -341,26 +271,25 @@ def add_new_client_file():
         db.session.add(new_file)
         db.session.commit()
         logging.debug(f"Client file with file_number {file_number} added successfully.")
-        return jsonify(new_file.to_dict()), 201
+        return jsonify({'message': 'Client file added successfully'}), 201
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error adding client file: {str(e)}")
         return jsonify({'message': str(e)}), 500
 
-@current_app.route('/api/client_files/<int:file_id>/upload', methods=['POST'])
+@current_app.route('/upload', methods=['POST'])
 @login_required
-def upload_client_file(file_id):
-    client_file = ClientFile.query.get_or_404(file_id)
+def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     if file:
-        filename = f"{client_file.file_number}_{file.filename}"
-        file_path = os.path.join(current_app.root_path, 'uploads', filename)
+        file_number = request.form['fileNumber']
+        filename = f"{file_number}_{file.filename}"
+        file_path = os.path.join(current_app.root_path, filename)
         file.save(file_path)
-        # Save file path to the database if needed
         return jsonify({'message': 'File uploaded successfully', 'file_path': file_path}), 200
 
 @current_app.route('/api/client_files/<int:id>', methods=['PUT'])
