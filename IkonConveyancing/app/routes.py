@@ -237,6 +237,11 @@ def get_checklist_progress(file_id):
 @login_required
 def manage_client_files():
     try:
+        print("Form Data Received:")
+        print(request.form)
+        print("Files Received:")
+        print(request.files)
+
         # Handling form data
         file_number = request.form.get('fileNumber')
         client_name = request.form.get('clientName')
@@ -247,6 +252,7 @@ def manage_client_files():
 
         # Ensure all required fields are provided
         if not all([file_number, client_name, settlement_date, type_of_client, progress]):
+            print("Missing required fields")
             return jsonify({'error': 'Missing required form fields'}), 400
 
         # Handling file upload
@@ -254,6 +260,8 @@ def manage_client_files():
         if file and file.filename != '':
             filename = f"{file_number}_{file.filename}"
             file_path = os.path.join(current_app.root_path, 'uploads', filename)
+
+            print(f"Saving file to: {file_path}")
             file.save(file_path)  # Save the file to the server
             
             # Create a new client file entry
@@ -268,10 +276,41 @@ def manage_client_files():
             )
             db.session.add(new_client_file)
             db.session.commit()
+
+            print(f"Client File Created: {new_client_file.to_dict()}")
             return jsonify(new_client_file.to_dict()), 201
         else:
+            print("File missing or not selected")
             return jsonify({'error': 'File is required or not selected'}), 400
 
     except Exception as e:
-        print(e)
+        print(f"Exception: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@current_app.route('/api/client_files', methods=['POST'])
+@login_required
+def create_client_file():
+    try:
+        data = request.form
+
+        # Ensure all required fields are provided
+        if not all([data.get('fileNumber'), data.get('clientName'), data.get('settlementDate'), data.get('typeOfClient'), data.get('progress')]):
+            return jsonify({'error': 'Missing required form fields'}), 400
+
+        client_file = ClientFile(
+            file_number=data.get('fileNumber'),
+            client_name=data.get('clientName'),
+            settlement_date=datetime.strptime(data.get('settlementDate'), '%Y-%m-%d').date(),
+            type_of_client=data.get('typeOfClient'),
+            progress=data.get('progress'),
+            notes=data.get('notes'),
+            user_id=current_user.id
+        )
+
+        db.session.add(client_file)
+        db.session.commit()
+
+        return jsonify(client_file.to_dict()), 201
+
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
