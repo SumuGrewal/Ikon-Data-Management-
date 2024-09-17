@@ -23,27 +23,30 @@
             </ul>
         </nav>
         <main class="dashboard">
-            <section class="recently-viewed">
-                <h2>Recently Viewed</h2>
-                <!-- Add recently viewed items here -->
+            <section class="company-name">
+                <h1>Ikon Conveyancing</h1>
             </section>
-            <section class="alerts">
-                <h2>Alerts</h2>
-                <!-- Add alerts here -->
+            <section class="hardwood-quote">
+                <blockquote>
+                    "The creation of a thousand forests is in one acorn." - Ralph Waldo Emerson
+                </blockquote>
             </section>
-            <section class="calendar-widget">
-                <h2>Calendar</h2>
-                <!-- Add calendar widget here -->
-            </section>
-            <section class="settlements">
-                <h2>Settlements</h2>
-                <!-- Add settlements info here -->
+            <section class="todo-list">
+                <h2>To-Do List</h2>
+                <form id="todo-form">
+                    <input type="text" id="todo-input" placeholder="Add a new task" required>
+                    <button type="submit">Add</button>
+                </form>
+                <ul id="todo-list">
+                    <!-- To-do items will be loaded dynamically -->
+                </ul>
             </section>
         </main>
     </div>
 
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 </body>
 
 </html>

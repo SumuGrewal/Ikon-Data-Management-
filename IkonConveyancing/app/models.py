@@ -20,9 +20,6 @@ class User(UserMixin, db.Model):
 class EmailTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String(150), nullable=False)
-    settlement_date = db.Column(db.String(150), nullable=False)
-    client_name = db.Column(db.String(150), nullable=False)
-    address = db.Column(db.String(150), nullable=False)
     body = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -30,13 +27,12 @@ class EmailTemplate(db.Model):
         return {
             'id': self.id,
             'subject': self.subject,
-            'settlement_date': self.settlement_date,
-            'client_name': self.client_name,
-            'address': self.address,
             'body': self.body,
             'user_id': self.user_id
         }
 
+    def __repr__(self):
+        return f"EmailTemplate('{self.subject}', '{self.user_id}')"
     def __repr__(self):
         return f"EmailTemplate('{self.subject}', '{self.client_name}')"
 
@@ -90,5 +86,18 @@ class Event(db.Model):
             'start': self.start.isoformat(),
             'description': self.description,
             'priority': self.priority,
+            'user_id': self.user_id
+        }
+
+
+class TodoItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(200), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'description': self.description,
             'user_id': self.user_id
         }

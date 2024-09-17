@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, current_app, jsonify
 from IkonConveyancing.app import db
-from IkonConveyancing.app.models import User, EmailTemplate, ClientFile, ChecklistItem, Event
+from IkonConveyancing.app.models import User, EmailTemplate, ClientFile, ChecklistItem, Event, TodoItem
 from flask_login import login_user, logout_user, login_required, current_user
 import smtplib
 from email.mime.text import MIMEText
@@ -88,33 +88,26 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# API to manage email templates (CREATE and GET for all templates)
+# API to manage email templates
 @current_app.route('/api/templates', methods=['GET', 'POST'])
 @login_required
 def manage_templates():
     if request.method == 'POST':
         # Create a new template
-        # Use `request.form` to match the FormData from the frontend
-        subject = request.form.get('subject')
-        body = request.form.get('body')
-
-        if not subject or not body:
-            return jsonify({'message': 'Subject and body are required'}), 400
-
+        data = request.json
         new_template = EmailTemplate(
-            subject=subject,
-            body=body,
+            subject=data['subject'],
+            body=data['body'],
             user_id=current_user.id
         )
         db.session.add(new_template)
         db.session.commit()
-        return jsonify(new_template.to_dict()), 201
+        return jsonify({'message': 'Template created successfully'}), 201
     
     # Retrieve all templates for the logged-in user
     templates = EmailTemplate.query.filter_by(user_id=current_user.id).all()
     return jsonify([template.to_dict() for template in templates])
 
-# API for managing a single email template (GET, UPDATE, DELETE)
 @current_app.route('/api/templates/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def manage_single_template(id):
@@ -126,17 +119,17 @@ def manage_single_template(id):
 
     elif request.method == 'PUT':
         # Update an existing template
-        subject = request.form.get('subject')
-        body = request.form.get('body')
-
-        if not subject or not body:
-            return jsonify({'message': 'Subject and body are required'}), 400
-
-        template.subject = subject
-        template.body = body
+        data = request.json
+        template.subject = data['subject']
+        template.body = data['body']
         db.session.commit()
         return jsonify({'message': 'Template updated successfully'})
 
+    elif request.method == 'DELETE':
+        # Delete the template
+        db.session.delete(template)
+        db.session.commit()
+        return jsonify({'message': 'Template deleted successfully'})
     elif request.method == 'DELETE':
         # Delete the template
         db.session.delete(template)
@@ -283,3 +276,26 @@ def get_checklist_progress(file_id):
     completed_items = sum(1 for item in checklist_items if item.status == 'completed')
     progress = (completed_items / total_items) * 100 if total_items > 0 else 0
     return jsonify({'progress': progress})
+@current_app.route('/api/todos', methods=['GET', 'POST'])
+@login_required
+def manage_todos():
+    if request.method == 'POST':
+        data = request.json
+        new_todo = TodoItem(
+            description=data['description'],
+            user_id=current_user.id
+        )
+        db.session.add(new_todo)
+        db.session.commit()
+        return jsonify(new_todo.to_dict()), 201
+    
+    todos = TodoItem.query.filter_by(user_id=current_user.id).all()
+    return jsonify([todo.to_dict() for todo in todos])
+
+@current_app.route('/api/todos/<int:id>', methods=['DELETE'])
+@login_required
+def delete_todo_item(id):
+    todo = TodoItem.query.get_or_404(id)
+    db.session.delete(todo)
+    db.session.commit()
+    return jsonify({'message': 'To-do item deleted successfully'})
