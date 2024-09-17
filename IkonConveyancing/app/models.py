@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(150), nullable=False)
-    reminders = db.relationship('Reminder', backref='user', lazy=True)
+    reminders = db.relationship('Reminder', backref='user_reminder', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -48,27 +48,31 @@ class EmailTemplate(db.Model):
 
 class ClientFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    file_number = db.Column(db.String(20), unique=False, nullable=False)
     client_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)  # Add this line
+    contact_info = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(200), nullable=False)
     settlement_date = db.Column(db.Date, nullable=False)
     type_of_client = db.Column(db.String(50), nullable=False)
+    property_type = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
-    progress = db.Column(db.String(50), nullable=False)  # Progress bar value
+    documents = db.Column(db.String(200), nullable=True)  # Path to uploaded documents
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    reminders = db.relationship('Reminder', back_populates='client_file', cascade="all, delete-orphan")
 
-    # Relationship with reminders
-    reminders = db.relationship('Reminder', back_populates='client_file', lazy=True)
 
     def to_dict(self):
         return {
             'id': self.id,
-            'file_number': self.file_number,
             'client_name': self.client_name,
+            'email': self.email,  # Add this line
+            'contact_info': self.contact_info,
+            'address': self.address,
             'settlement_date': self.settlement_date.isoformat(),
             'type_of_client': self.type_of_client,
-            'progress': self.progress,
-            'notes': self.notes
+            'property_type': self.property_type,
+            'notes': self.notes,
+            'documents': self.documents
         }
 
     def to_dict(self):

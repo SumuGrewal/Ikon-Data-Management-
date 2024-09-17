@@ -7,7 +7,7 @@
     <style>
         body, html {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             height: 100%;
             background: #f4f4f4;
         }
@@ -46,7 +46,6 @@
             overflow-y: auto;
         }
 
-        /* Align filters in one line */
         .filters {
             display: flex;
             align-items: center;
@@ -132,7 +131,6 @@
             color: black;
         }
 
-        /* Urgent reminder container */
         .urgent-reminders {
             background-color: #fff;
             padding: 15px;
@@ -163,8 +161,6 @@
                 <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
                 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
                 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-                <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
-            </body>
             </ul>
         </nav>
 
@@ -206,34 +202,6 @@
             </div>
         </aside>
     </div>
-    <div class="urgent-reminders">
-        <h3>Urgent Reminders</h3>
-        <ul id="reminders-list"></ul>
-    </div>
-</main>
-</div>
-
-<script>
-// Load urgent reminders when the page is loaded
-window.onload = function() {
-    fetch('/api/get_urgent_reminders')
-    .then(response => response.json())
-    .then(data => {
-        const remindersList = document.getElementById('reminders-list');
-        remindersList.innerHTML = '';  // Clear any previous reminders
-        if (data.length > 0) {
-            data.forEach(reminder => {
-                const reminderItem = document.createElement('li');
-                reminderItem.textContent = `${reminder.reminder_text} (Due: ${reminder.reminder_datetime}) - Client: ${reminder.client_file}`;
-                remindersList.appendChild(reminderItem);
-            });
-        } else {
-            remindersList.textContent = 'No urgent reminders.';
-        }
-    })
-    .catch(error => console.error('Error fetching reminders:', error));
-};
-</script>
 
     <!-- Modal for adding/editing client -->
     <div id="clientFormPopup" class="modal">
@@ -277,6 +245,9 @@ window.onload = function() {
                 <label for="documents">Upload Documents:</label>
                 <input type="file" id="documents" name="documents" multiple>
 
+                <label for="reminderDatetime">Set Reminder:</label>
+                <input type="datetime-local" id="reminderDatetime" name="reminderDatetime">
+
                 <button type="button" onclick="submitClientForm()">Submit</button>
             </form>
         </div>
@@ -289,18 +260,16 @@ window.onload = function() {
             modal.style.display = show ? 'flex' : 'none';
 
             if (client) {
-                // Fill in the form for editing
                 document.getElementById('clientId').value = client.id;
-                document.getElementById('clientName').value = client.clientName;
+                document.getElementById('clientName').value = client.client_name;
                 document.getElementById('email').value = client.email;
                 document.getElementById('contact').value = client.contact;
                 document.getElementById('address').value = client.address;
-                document.getElementById('settlementDate').value = client.settlementDate;
-                document.getElementById('typeOfClient').value = client.typeOfClient;
-                document.getElementById('propertyType').value = client.propertyType;
+                document.getElementById('settlementDate').value = client.settlement_date;
+                document.getElementById('typeOfClient').value = client.type_of_client;
+                document.getElementById('propertyType').value = client.property_type;
                 document.getElementById('notes').value = client.notes;
             } else {
-                // Reset form for new entry
                 document.getElementById('clientForm').reset();
             }
         }
@@ -344,13 +313,13 @@ window.onload = function() {
                     const clientDiv = document.createElement('div');
                     clientDiv.className = 'file-entry';
                     clientDiv.innerHTML = `
-                        <p><strong>Client Name:</strong> ${client.clientName}</p>
+                        <p><strong>Client Name:</strong> ${client.client_name}</p>
                         <p><strong>Email:</strong> ${client.email}</p>
                         <p><strong>Contact:</strong> ${client.contact}</p>
                         <p><strong>Address:</strong> ${client.address}</p>
-                        <p><strong>Settlement Date:</strong> ${client.settlementDate}</p>
-                        <p><strong>Type of Client:</strong> ${client.typeOfClient}</p>
-                        <p><strong>Type of Property:</strong> ${client.propertyType}</p>
+                        <p><strong>Settlement Date:</strong> ${client.settlement_date}</p>
+                        <p><strong>Type of Client:</strong> ${client.type_of_client}</p>
+                        <p><strong>Type of Property:</strong> ${client.property_type}</p>
                         <button onclick='togglePopup(true, ${JSON.stringify(client)})'>Edit</button>
                     `;
                     clientEntries.appendChild(clientDiv);
@@ -370,7 +339,7 @@ window.onload = function() {
                     const reminderDiv = document.createElement('div');
                     reminderDiv.className = 'urgent-reminder';
                     reminderDiv.innerHTML = `
-                        <p><strong>${reminder.expense_name}:</strong> ${reminder.amount}</p>
+                        <p><strong>Reminder:</strong> ${reminder.reminder_text}</p>
                         <p><strong>Due on:</strong> ${reminder.reminder_datetime}</p>
                     `;
                     remindersContainer.appendChild(reminderDiv);

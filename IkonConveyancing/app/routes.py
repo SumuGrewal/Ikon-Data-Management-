@@ -9,6 +9,7 @@ from datetime import datetime
 from twofactorauth import totp
 import logging
 import os
+from werkzeug.utils import secure_filename
 
 # Home route
 @current_app.route('/')
@@ -226,40 +227,47 @@ def events():
 def checklist():
     return render_template('checklist.html')
 
-# API for client files
-@current_app.route('/api/client_files', methods=['GET', 'POST'])
+@current_app.route('/api/client_files', methods=['POST'])
 @login_required
 def manage_client_files():
-    if request.method == 'POST':
-        try:
-            file_number = request.form['fileNumber']
-            client_name = request.form['clientName']
-            settlement_date = request.form['settlementDate']
-            type_of_client = request.form['typeOfClient']
-            progress = request.form['progress']
-            notes = request.form['notes']
-
-            if not all([file_number, client_name, settlement_date, type_of_client, progress]):
-                return jsonify({'error': 'Missing required fields'}), 400
-
-            new_client_file = ClientFile(
-                file_number=file_number,
-                client_name=client_name,
-                settlement_date=datetime.strptime(settlement_date, '%Y-%m-%d').date(),
-                type_of_client=type_of_client,
-                progress=progress,
-                notes=notes
-            )
-            db.session.add(new_client_file)
-            db.session.commit()
-            return jsonify(new_client_file.to_dict()), 201
+    try:
+        # Assuming you're using a form with 'multipart/form-data'
+        client_name = request.form['clientName']
+        email = request.form['email']  # Ensure this field is captured
+        contact_info = request.form['contact']
+        address = request.form['address']
+        settlement_date = request.form['settlementDate']
+        type_of_client = request.form['typeOfClient']
+        property_type = request.form['propertyType']
+        notes = request.form['notes']
         
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    else:
-        files = ClientFile.query.all()
-        return jsonify([file.to_dict() for file in files])
+        # Handle document upload (if any)
+        document = request.files['documents'] if 'documents' in request.files else None
+        document_path = None
+        if document:
+            document_path = save_document(document)  # Save the document and return its path
+
+        # Create a new client file
+        new_client_file = ClientFile(
+            client_name=client_name,
+            email=email,  # Include the email field
+            contact_info=contact_info,
+            address=address,
+            settlement_date=datetime.strptime(settlement_date, '%Y-%m-%d').date(),
+            type_of_client=type_of_client,
+            property_type=property_type,
+            notes=notes,
+            documents=document_path,  # Save the document path if uploaded
+            user_id=current_user.id
+        )
+
+        db.session.add(new_client_file)
+        db.session.commit()
+        return jsonify(new_client_file.to_dict()), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 
 # API for checklist
 @current_app.route('/api/checklist/<int:file_id>', methods=['GET'])
@@ -362,15 +370,37 @@ def delete_event(event_id):
 def get_urgent_reminders():
     urgent_reminders = Reminder.query.filter(
         Reminder.reminder_datetime <= datetime.now(),
-        Reminder.is_paid == False,
         Reminder.user_id == current_user.id
     ).all()
 
+    # Prepare data to send as JSON
     reminder_list = [{
         'id': reminder.id,
-        'expense_name': reminder.expense.name,
-        'amount': reminder.expense.amount,
-        'reminder_datetime': reminder.reminder_datetime.strftime('%Y-%m-%d %H:%M:%S')
+        'reminder_text': reminder.reminder_text,
+        'reminder_datetime': reminder.reminder_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+        'client_file': reminder.client_file.client_name  # Assuming Reminder is linked to ClientFile
     } for reminder in urgent_reminders]
 
     return jsonify(reminder_list)
+
+# Define where to save uploaded documents
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'docx', 'txt'}
+
+# Make sure the upload folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    """ Check if the file extension is allowed """
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_document(document):
+    """ Save the document to the uploads folder """
+    if document and allowed_file(document.filename):
+        filename = secure_filename(document.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        document.save(file_path)  # Save the file
+        return file_path
+    else:
+        raise ValueError("File type not allowed")
