@@ -60,6 +60,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid #ddd;
         }
 
         .template-list button {
@@ -95,11 +96,20 @@
             padding: 20px;
             border-radius: 8px;
             width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #template-form h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0056b3;
         }
 
         #template-form label {
             display: block;
             margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
         }
 
         #template-form input, #template-form textarea {
@@ -108,6 +118,7 @@
             margin-bottom: 15px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            font-size: 14px;
         }
 
         #template-form button {
@@ -117,10 +128,21 @@
             padding: 10px 15px;
             border-radius: 4px;
             cursor: pointer;
+            width: 100%;
+            font-size: 16px;
         }
 
         #template-form button:hover {
             background-color: #003d7a;
+        }
+
+        #template-form .form-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #template-form .form-buttons button {
+            width: 48%;
         }
     </style>
 </head>
@@ -148,14 +170,24 @@
     <!-- Modal for adding or editing templates -->
     <div id="template-form-container">
         <form id="template-form">
+            <h3>Email Template</h3>
+
+            <label for="title">Title:</label>
+            <input type="text" id="title" required>
+
             <label for="subject">Subject:</label>
             <input type="text" id="subject" required>
             
             <label for="body">Body:</label>
             <textarea id="body" rows="10" required></textarea>
 
-            <button type="submit">Save</button>
-            <button type="button" id="cancel-form">Cancel</button>
+            <div class="form-buttons">
+                <button type="submit">Save</button>
+                <button type="button" id="cancel-form">Cancel</button>
+            </div>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="{{ url_for('static', filename='email.js') }}"></script>
         </form>
     </div>
 
@@ -163,6 +195,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const templateForm = document.getElementById('template-form');
+            const titleInput = document.getElementById('title');
             const subjectInput = document.getElementById('subject');
             const bodyInput = document.getElementById('body');
             const templateList = document.querySelector('.template-list');
@@ -182,6 +215,7 @@
             // Handle form submission
             templateForm.addEventListener('submit', function (e) {
                 e.preventDefault();
+                const title = titleInput.value;
                 const subject = subjectInput.value;
                 const body = bodyInput.value;
 
@@ -193,7 +227,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ subject, body }),
+                    body: JSON.stringify({ title, subject, body }),
                 })
                     .then(response => response.json())
                     .then(data => {
@@ -228,7 +262,7 @@
             // Function to add a new template to the list
             function addTemplateToList(template) {
                 const li = document.createElement('li');
-                li.textContent = template.subject;
+                li.textContent = `${template.title} - ${template.subject}`;
                 li.dataset.id = template.id;
 
                 const editBtn = document.createElement('button');
@@ -247,7 +281,7 @@
             // Function to update a template in the list
             function updateTemplateInList(template) {
                 const li = document.querySelector(`li[data-id='${template.id}']`);
-                li.textContent = template.subject;
+                li.textContent = `${template.title} - ${template.subject}`;
 
                 const editBtn = document.createElement('button');
                 editBtn.textContent = 'Edit';
@@ -264,6 +298,7 @@
             // Function to edit a template
             function editTemplate(template) {
                 templateFormContainer.style.display = 'flex';
+                titleInput.value = template.title;
                 subjectInput.value = template.subject;
                 bodyInput.value = template.body;
                 editingTemplateId = template.id;

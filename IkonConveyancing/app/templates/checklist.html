@@ -1,72 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist - Ikon Conveyancing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='Checklist/style.css') }}">
+
     <style>
-        /* Add your styles here */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
+        /* General body styling */
+        body, html {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
             height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
+            background-color: #f4f4f4;
         }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
+        /* Container and navigation */
+        .container {
+            display: grid;
+            grid-template-columns: 250px auto;
+            height: 100vh;
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        .navigation {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
         }
 
-        .close:hover,
-        .close:focus {
-            color: black;
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .navigation ul li a {
+            color: white;
+            padding: 10px;
+            display: flex;
+            align-items: center;
             text-decoration: none;
+        }
+
+        .navigation ul li a:hover {
+            background-color: #34495e;
+        }
+
+        .navigation ul li.active a {
+            background-color: #2c3e50;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+        }
+
+        .file-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .file-list li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             cursor: pointer;
         }
 
+        .file-list li:hover {
+            background-color: #f1f1f1;
+        }
+
+        .file-list li.active {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        /* Checklist Section */
+        .checklist-section {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* Initially hidden */
+        }
+
+        .checklist-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .checklist-items {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .checklist-items li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checklist-items li input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        /* Progress bar */
         .progress-bar {
+            margin-top: 20px;
+            height: 25px;
             width: 100%;
             background-color: #ddd;
-            margin-top: 20px;
-            height: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
         }
 
-        #progress-fill {
+        .progress-bar-fill {
             height: 100%;
-            background-color: #4caf50;
-            width: 0;
+            background-color: #0056b3;
+            width: 0%;
+            border-radius: 12px;
+            transition: width 0.5s;
         }
 
-        #progress-percentage {
-            margin-top: 10px;
-            display: block;
-            text-align: right;
+        /* Form for adding file */
+        .add-file-form {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .add-file-form input, .add-file-form button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
+        <!-- Navigation Menu -->
         <nav class="navigation">
             <ul>
                 <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
@@ -75,131 +160,197 @@
                 <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
                 <li class="active"><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
                 <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
-                <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
             </ul>
         </nav>
-        <main class="checklist-content">
-            <div class="file-list">
-                <h2>Client Files</h2>
-                <ul id="file-list">
-                    <!-- File list will be dynamically populated here -->
-                </ul>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h2>File Number Checklist</h2>
+
+            <!-- Add File Form -->
+            <div class="add-file-form">
+                <input type="text" id="file-number-input" placeholder="Enter File Number">
+                <input type="date" id="settlement-date-input" placeholder="Enter Settlement Date">
                 <button id="add-file-button">Add File</button>
             </div>
-            <div class="checklist">
-                <h2>Checklist for <span id="selected-file"></span></h2>
-                <ul id="checklist-items">
-                    <!-- Checklist items will be dynamically populated here -->
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <label for="filter-date">Filter by Settlement Date: </label>
+                <input type="date" id="filter-date">
+                <button id="apply-filter">Apply Filter</button>
+            </div>
+
+            <!-- File Numbers Section -->
+            <ul class="file-list">
+                <!-- File numbers will be dynamically loaded here -->
+            </ul>
+
+            <!-- Checklist Section -->
+            <div class="checklist-section">
+                <h2>File: <span id="file-number-display">BS0000</span></h2>
+                <ul class="checklist-items">
+                    <li><input type="checkbox" class="check-item" data-item="Certificates Ordered"> Certificates Ordered</li>
+                    <li><input type="checkbox" class="check-item" data-item="Loan Approval"> Loan Approval</li>
+                    <li><input type="checkbox" class="check-item" data-item="Verification of Identity"> Verification of Identity</li>
+                    <li><input type="checkbox" class="check-item" data-item="Property Inspection Complete"> Property Inspection Complete</li>
+                    <li><input type="checkbox" class="check-item" data-item="Deposit Received"> Deposit Received</li>
+                    <li><input type="checkbox" class="check-item" data-item="Contract Signed"> Contract Signed</li>
+                    <li><input type="checkbox" class="check-item" data-item="Finance Approved"> Finance Approved</li>
                 </ul>
+
+                <!-- Progress Bar -->
                 <div class="progress-bar">
-                    <div id="progress-fill"></div>
+                    <div class="progress-bar-fill"></div>
                 </div>
-                <span id="progress-percentage"></span>
             </div>
         </main>
     </div>
 
-    <!-- Modal for adding a new file -->
-    <div id="addFileModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Add File</h2>
-            <form id="add-file-form">
-                <label for="file-number">File Number:</label>
-                <input type="text" id="file-number" name="file-number" required><br>
-                <button type="submit">Add File</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for updating checklist items -->
-    <div id="updateChecklistModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Update Checklist</h2>
-            <form id="update-checklist-form">
-                <label><input type="checkbox" name="checklist-item" value="Got the files"> Got the files</label><br>
-                <label><input type="checkbox" name="checklist-item" value="IDs got identity verification"> IDs got identity verification</label><br>
-                <label><input type="checkbox" name="checklist-item" value="Settlement date is set"> Settlement date is set</label><br>
-                <label><input type="checkbox" name="checklist-item" value="Loan is ready"> Loan is ready</label><br>
-                <label><input type="checkbox" name="checklist-item" value="Finances are final"> Finances are final</label><br>
-                <label><input type="checkbox" name="checklist-item" value="Settlement done"> Settlement done</label><br>
-                <button type="submit">Update Checklist</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='checklist/script.js') }}"></script>
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- JavaScript to handle the file checklist and progress bar -->
     <script>
-        document.getElementById('add-file-button').addEventListener('click', function() {
-            document.getElementById('addFileModal').style.display = 'block';
-        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileList = document.querySelector('.file-list');
+            const fileNumberDisplay = document.getElementById('file-number-display');
+            const checklistItems = document.querySelectorAll('.check-item');
+            const progressBarFill = document.querySelector('.progress-bar-fill');
+            const addFileButton = document.getElementById('add-file-button');
+            const fileNumberInput = document.getElementById('file-number-input');
+            const settlementDateInput = document.getElementById('settlement-date-input');
+            const filterDateInput = document.getElementById('filter-date');
+            const applyFilterButton = document.getElementById('apply-filter');
+            const checklistSection = document.querySelector('.checklist-section');
+            let activeFileNumber = null;
 
-        document.querySelectorAll('.close').forEach(function(element) {
-            element.addEventListener('click', function() {
-                element.closest('.modal').style.display = 'none';
+            let files = [];
+
+            // Load files into the file list
+            function loadFileNumbers() {
+                fileList.innerHTML = '';
+                files.forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = `${file.fileNumber} - ${file.settlementDate}`;
+                    li.addEventListener('click', () => {
+                        saveChecklistProgress();
+                        selectFile(file.fileNumber, li);
+                    });
+                    fileList.appendChild(li);
+                });
+            }
+
+            // Handle file selection
+            function selectFile(fileNumber, element) {
+                // Highlight selected file and remove active class from others
+                document.querySelectorAll('.file-list li').forEach(li => li.classList.remove('active'));
+                element.classList.add('active');
+
+                // Display the selected file number
+                fileNumberDisplay.textContent = fileNumber;
+                activeFileNumber = fileNumber;
+
+                // Show checklist section
+                checklistSection.style.display = 'block';
+
+                // Load checklist progress from the backend
+                fetch(`/api/checklist/${fileNumber}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        checklistItems.forEach(item => {
+                            item.checked = data.some(checklistItem => checklistItem.description === item.dataset.item && checklistItem.status === 'completed');
+                        });
+                        updateProgressBar();
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // Save checklist progress to the backend
+            function saveChecklistProgress() {
+                if (activeFileNumber) {
+                    const checklistData = Array.from(checklistItems).map(item => ({
+                        description: item.dataset.item,
+                        status: item.checked ? 'completed' : 'pending'
+                    }));
+
+                    fetch(`/api/checklist/${activeFileNumber}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ checklist_items: checklistData })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Checklist updated:', data);
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            }
+
+            // Update the progress bar based on checked items
+            function updateProgressBar() {
+                const totalItems = checklistItems.length;
+                const checkedItems = document.querySelectorAll('.check-item:checked').length;
+                const progressPercentage = (checkedItems / totalItems) * 100;
+                progressBarFill.style.width = `${progressPercentage}%`;
+            }
+
+            // Attach change event to checklist items
+            checklistItems.forEach(item => {
+                item.addEventListener('change', updateProgressBar);
             });
-        });
 
-        document.getElementById('add-file-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
-            fetch('/api/client_files', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'Client file added successfully') {
-                    location.reload();
-                } else {
-                    alert('Error adding client file: ' + data.message);
+            // Handle adding a new file
+            addFileButton.addEventListener('click', function () {
+                const fileNumber = fileNumberInput.value;
+                const settlementDate = settlementDateInput.value;
+
+                if (fileNumber && settlementDate) {
+                    files.push({ fileNumber, settlementDate });
+                    loadFileNumbers();
+                    fileNumberInput.value = '';
+                    settlementDateInput.value = '';
+
+                    // Save the file and its checklist to the backend
+                    fetch('/api/client_files', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fileNumber, settlementDate })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('File saved:', data);
+                    })
+                    .catch(error => console.error('Error:', error));
                 }
-            })
-            .catch(error => console.error('Error:', error));
-        });
+            });
 
-        document.getElementById('update-checklist-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const checklistItems = formData.getAll('checklist-item');
-            const fileId = document.getElementById('selected-file').dataset.fileId;
-            fetch(`/api/checklist/${fileId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ checklist_items: checklistItems })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'Checklist updated successfully') {
-                    updateProgressBar(fileId);
-                } else {
-                    alert('Error updating checklist: ' + data.message);
+            // Handle filter by date
+            applyFilterButton.addEventListener('click', function () {
+                const filterDate = filterDateInput.value;
+
+                if (filterDate) {
+                    const filteredFiles = files.filter(file => file.settlementDate <= filterDate);
+                    fileList.innerHTML = '';
+                    filteredFiles.forEach(file => {
+                        const li = document.createElement('li');
+                        li.textContent = `${file.fileNumber} - ${file.settlementDate}`;
+                        li.addEventListener('click', () => {
+                            saveChecklistProgress();
+                            selectFile(file.fileNumber, li);
+                        });
+                        fileList.appendChild(li);
+                    });
                 }
-            })
-            .catch(error => console.error('Error:', error));
-        });
+            });
 
-        function updateProgressBar(fileId) {
-            fetch(`/api/checklist/${fileId}/progress`)
-            .then(response => response.json())
-            .then(data => {
-                const progressFill = document.getElementById('progress-fill');
-                const progressPercentage = document.getElementById('progress-percentage');
-                progressFill.style.width = `${data.progress}%`;
-                progressPercentage.textContent = `${data.progress}%`;
-            })
-            .catch(error => console.error('Error:', error));
-        }
-        
+            // Initialize the page by loading file numbers
+            fetch('/api/client_files')
+                .then(response => response.json())
+                .then(data => {
+                    files = data;
+                    loadFileNumbers();
+                })
+                .catch(error => console.error('Error:', error));
+        });
     </script>
 </body>
+
 </html>

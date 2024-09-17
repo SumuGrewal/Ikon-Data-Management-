@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request, current_app, jsonify
+from flask import render_template, flash, redirect, url_for, request, current_app, jsonify, json
 from IkonConveyancing.app import db
 from IkonConveyancing.app.models import User, EmailTemplate, ClientFile, ChecklistItem, Event, TodoItem
 from flask_login import login_user, logout_user, login_required, current_user
@@ -96,6 +96,7 @@ def manage_templates():
         # Create a new template
         data = request.json
         new_template = EmailTemplate(
+            title=data['title'],  # Ensure the title is captured
             subject=data['subject'],
             body=data['body'],
             user_id=current_user.id
@@ -103,10 +104,21 @@ def manage_templates():
         db.session.add(new_template)
         db.session.commit()
         return jsonify(new_template.to_dict()), 201
-    
+
     # Retrieve all templates for the logged-in user
     templates = EmailTemplate.query.filter_by(user_id=current_user.id).all()
     return jsonify([template.to_dict() for template in templates])
+
+@current_app.route('/api/templates/<int:id>', methods=['PUT'])
+@login_required
+def update_template(id):
+    template = EmailTemplate.query.get_or_404(id)
+    data = request.json
+    template.title = data['title']  # Ensure title is updated
+    template.subject = data['subject']  # Ensure subject is updated
+    template.body = data['body']  # Ensure body is updated
+    db.session.commit()
+    return jsonify(template.to_dict())
 
 @current_app.route('/api/templates/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
@@ -294,3 +306,42 @@ def delete_todo_item(id):
     db.session.delete(todo)
     db.session.commit()
     return jsonify({'message': 'To-do item deleted successfully'})
+@current_app.route('/api/client_files', methods=['POST'])
+@login_required
+def add_client_file():
+    data = request.json
+    new_file = ClientFile(
+        file_number=data['fileNumber'],
+        settlement_date=datetime.strptime(data['settlementDate'], '%Y-%m-%d').date(),
+        user_id=current_user.id
+    )
+    db.session.add(new_file)
+    db.session.commit()
+    return jsonify(new_file.to_dict()), 201
+@current_app.route('/api/save_checklist/<file_number>', methods=['POST'])
+@login_required
+def save_checklist(file_number):
+    data = request.json
+    checklist_status = data['checklistStatus']
+
+    # Find the file and update its checklist status (store it as JSON in the database)
+    client_file = ClientFile.query.filter_by(file_number=file_number, user_id=current_user.id).first_or_404()
+    client_file.checklist_status = json.dumps(checklist_status)
+    db.session.commit()
+
+    return jsonify({'message': 'Checklist progress saved successfully'}), 200
+@current_app.route('/api/load_checklist/<file_number>', methods=['GET'])
+@login_required
+def load_checklist(file_number):
+    client_file = ClientFile.query.filter_by(file_number=file_number, user_id=current_user.id).first_or_404()
+    checklist_status = json.loads(client_file.checklist_status)
+
+    return jsonify({'checklistStatus': checklist_status}), 200
+@current_app.route('/api/checklist/<int:file_id>/progress', methods=['GET'])
+@login_required
+def get_checklist_progress(file_id):
+    checklist_items = ChecklistItem.query.filter_by(client_file_id=file_id).all()
+    total_items = len(checklist_items)
+    completed_items = sum(1 for item in checklist_items if item.status == 'completed')
+    progress = (completed_items / total_items) * 100 if total_items > 0 else 0
+    return jsonify({'progress': progress})

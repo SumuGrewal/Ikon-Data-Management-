@@ -1,6 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from IkonConveyancing.app import db
 from flask_login import UserMixin
+from flask import json
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,8 +18,10 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f"User('{self.username}', '{self.email}')"
 
+# 
 class EmailTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)  # New Title field
     subject = db.Column(db.String(150), nullable=False)
     body = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -26,10 +29,12 @@ class EmailTemplate(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'title': self.title,
             'subject': self.subject,
             'body': self.body,
             'user_id': self.user_id
         }
+
 
     def __repr__(self):
         return f"EmailTemplate('{self.subject}', '{self.user_id}')"
@@ -45,6 +50,7 @@ class ClientFile(db.Model):
     type_of_client = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
     progress = db.Column(db.String(50), nullable=False)  # Add this line
+    checklist_status = db.Column(db.Text, nullable=False, default=json.dumps([False] * 7))
 
     def to_dict(self):
         return {
@@ -54,9 +60,9 @@ class ClientFile(db.Model):
             'settlement_date': self.settlement_date.isoformat(),
             'type_of_client': self.type_of_client,
             'progress': self.progress,  # Add this line to the dict
-            'notes': self.notes
+            'notes': self.notes,
+            'checklist_status': json.loads(self.checklist_status)  # Load checklist status as JSON
         }
-
 
 class ChecklistItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
