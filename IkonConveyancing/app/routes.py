@@ -318,30 +318,28 @@ def add_client_file():
     db.session.add(new_file)
     db.session.commit()
     return jsonify(new_file.to_dict()), 201
+# Save checklist progress for a specific file
 @current_app.route('/api/save_checklist/<file_number>', methods=['POST'])
 @login_required
 def save_checklist(file_number):
     data = request.json
     checklist_status = data['checklistStatus']
 
-    # Find the file and update its checklist status (store it as JSON in the database)
+    # Find the file and update its checklist status (store as JSON in the database)
     client_file = ClientFile.query.filter_by(file_number=file_number, user_id=current_user.id).first_or_404()
     client_file.checklist_status = json.dumps(checklist_status)
     db.session.commit()
 
     return jsonify({'message': 'Checklist progress saved successfully'}), 200
+
+# Load checklist for a specific file
 @current_app.route('/api/load_checklist/<file_number>', methods=['GET'])
 @login_required
 def load_checklist(file_number):
     client_file = ClientFile.query.filter_by(file_number=file_number, user_id=current_user.id).first_or_404()
-    checklist_status = json.loads(client_file.checklist_status)
+    if client_file.checklist_status:
+        checklist_status = json.loads(client_file.checklist_status)
+    else:
+        checklist_status = {}  # Return empty if no checklist has been saved
 
     return jsonify({'checklistStatus': checklist_status}), 200
-@current_app.route('/api/checklist/<int:file_id>/progress', methods=['GET'])
-@login_required
-def get_checklist_progress(file_id):
-    checklist_items = ChecklistItem.query.filter_by(client_file_id=file_id).all()
-    total_items = len(checklist_items)
-    completed_items = sum(1 for item in checklist_items if item.status == 'completed')
-    progress = (completed_items / total_items) * 100 if total_items > 0 else 0
-    return jsonify({'progress': progress})

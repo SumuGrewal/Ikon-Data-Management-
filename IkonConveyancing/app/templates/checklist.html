@@ -146,6 +146,37 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
+        /* Filter section */
+        .filter-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .filter-section input, .filter-section button {
+            padding: 10px;
+            margin: 5px 0;
+            width: calc(100% - 20px);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .clear-filter-btn {
+            background-color: #ff4c4c;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .clear-filter-btn:hover {
+            background-color: #ff1a1a;
+        }
     </style>
 </head>
 
@@ -154,12 +185,12 @@
         <!-- Navigation Menu -->
         <nav class="navigation">
             <ul>
-                <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
-                <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
-                <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
-                <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li class="active"><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
-                <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
+                <li><a href="/dashboard"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                <li><a href="/client_files"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                <li><a href="/send_email"><ion-icon name="mail"></ion-icon> Send Email</a></li>
+                <li><a href="/calendar"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
+                <li class="active"><a href="/checklist"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="/logout"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
             </ul>
         </nav>
 
@@ -179,6 +210,7 @@
                 <label for="filter-date">Filter by Settlement Date: </label>
                 <input type="date" id="filter-date">
                 <button id="apply-filter">Apply Filter</button>
+                <button class="clear-filter-btn" id="clear-filter">Clear Filter</button>
             </div>
 
             <!-- File Numbers Section -->
@@ -219,51 +251,12 @@
             const settlementDateInput = document.getElementById('settlement-date-input');
             const filterDateInput = document.getElementById('filter-date');
             const applyFilterButton = document.getElementById('apply-filter');
+            const clearFilterButton = document.getElementById('clear-filter');
             const checklistSection = document.querySelector('.checklist-section');
             let activeFileNumber = null;
-
             let files = [];
 
-            // Load files into the file list
-            function loadFileNumbers() {
-                fileList.innerHTML = '';
-                files.forEach(file => {
-                    const li = document.createElement('li');
-                    li.textContent = `${file.fileNumber} - ${file.settlementDate}`;
-                    li.addEventListener('click', () => {
-                        saveChecklistProgress();
-                        selectFile(file.fileNumber, li);
-                    });
-                    fileList.appendChild(li);
-                });
-            }
-
-            // Handle file selection
-            function selectFile(fileNumber, element) {
-                // Highlight selected file and remove active class from others
-                document.querySelectorAll('.file-list li').forEach(li => li.classList.remove('active'));
-                element.classList.add('active');
-
-                // Display the selected file number
-                fileNumberDisplay.textContent = fileNumber;
-                activeFileNumber = fileNumber;
-
-                // Show checklist section
-                checklistSection.style.display = 'block';
-
-                // Load checklist progress from the backend
-                fetch(`/api/checklist/${fileNumber}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        checklistItems.forEach(item => {
-                            item.checked = data.some(checklistItem => checklistItem.description === item.dataset.item && checklistItem.status === 'completed');
-                        });
-                        updateProgressBar();
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-
-            // Save checklist progress to the backend
+            // Save checklist progress for a specific file
             function saveChecklistProgress() {
                 if (activeFileNumber) {
                     const checklistData = Array.from(checklistItems).map(item => ({
@@ -271,17 +264,31 @@
                         status: item.checked ? 'completed' : 'pending'
                     }));
 
-                    fetch(`/api/checklist/${activeFileNumber}`, {
-                        method: 'PUT',
+                    fetch(`/api/save_checklist/${activeFileNumber}`, {
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ checklist_items: checklistData })
+                        body: JSON.stringify({ checklistStatus: checklistData })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log('Checklist updated:', data);
+                        console.log('Checklist progress saved:', data);
                     })
                     .catch(error => console.error('Error:', error));
                 }
+            }
+
+            // Load checklist progress when a file is selected
+            function loadChecklistProgress(fileNumber) {
+                fetch(`/api/load_checklist/${fileNumber}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        checklistItems.forEach(item => {
+                            const status = data.checklistStatus.find(checklistItem => checklistItem.description === item.dataset.item);
+                            item.checked = status && status.status === 'completed';
+                        });
+                        updateProgressBar();
+                    })
+                    .catch(error => console.error('Error:', error));
             }
 
             // Update the progress bar based on checked items
@@ -291,11 +298,6 @@
                 const progressPercentage = (checkedItems / totalItems) * 100;
                 progressBarFill.style.width = `${progressPercentage}%`;
             }
-
-            // Attach change event to checklist items
-            checklistItems.forEach(item => {
-                item.addEventListener('change', updateProgressBar);
-            });
 
             // Handle adding a new file
             addFileButton.addEventListener('click', function () {
@@ -322,23 +324,51 @@
                 }
             });
 
+            // Handle file selection and load checklist progress
+            function selectFile(fileNumber, element) {
+                // Highlight selected file and remove active class from others
+                document.querySelectorAll('.file-list li').forEach(li => li.classList.remove('active'));
+                element.classList.add('active');
+
+                // Save progress for the previously active file before switching
+                saveChecklistProgress();
+
+                // Display the selected file number
+                fileNumberDisplay.textContent = fileNumber;
+                activeFileNumber = fileNumber;
+
+                // Show checklist section
+                checklistSection.style.display = 'block';
+
+                // Load checklist progress for the selected file
+                loadChecklistProgress(fileNumber);
+            }
+
+            // Load files into the file list
+            function loadFileNumbers(fileArray = files) {
+                fileList.innerHTML = '';
+                fileArray.forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = `${file.fileNumber} - ${file.settlementDate}`;
+                    li.addEventListener('click', () => selectFile(file.fileNumber, li));
+                    fileList.appendChild(li);
+                });
+            }
+
             // Handle filter by date
             applyFilterButton.addEventListener('click', function () {
                 const filterDate = filterDateInput.value;
 
                 if (filterDate) {
                     const filteredFiles = files.filter(file => file.settlementDate <= filterDate);
-                    fileList.innerHTML = '';
-                    filteredFiles.forEach(file => {
-                        const li = document.createElement('li');
-                        li.textContent = `${file.fileNumber} - ${file.settlementDate}`;
-                        li.addEventListener('click', () => {
-                            saveChecklistProgress();
-                            selectFile(file.fileNumber, li);
-                        });
-                        fileList.appendChild(li);
-                    });
+                    loadFileNumbers(filteredFiles);
                 }
+            });
+
+            // Handle clear filter button
+            clearFilterButton.addEventListener('click', function () {
+                filterDateInput.value = '';  // Clear the filter input
+                loadFileNumbers();  // Reload all files
             });
 
             // Initialize the page by loading file numbers
