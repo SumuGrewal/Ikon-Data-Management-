@@ -233,43 +233,45 @@ def get_checklist_progress(file_id):
     progress = (completed_items / total_items) * 100 if total_items > 0 else 0
     return jsonify({'progress': progress})
 
-@current_app.route('/client_files/<file_number>')
+@current_app.route('/api/client_files', methods=['POST'])
 @login_required
-def client_details(file_number):
-    client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
-    return render_template('client_details.html', client_file=client_file)
+def manage_client_files():
+    try:
+        # Handling form data
+        file_number = request.form.get('fileNumber')
+        client_name = request.form.get('clientName')
+        settlement_date = request.form.get('settlementDate')
+        type_of_client = request.form.get('typeOfClient')
+        progress = request.form.get('progress')
+        notes = request.form.get('notes')
 
- 
+        # Ensure all required fields are provided
+        if not all([file_number, client_name, settlement_date, type_of_client, progress]):
+            return jsonify({'error': 'Missing required form fields'}), 400
 
-@current_app.route('/upload', methods=['POST'])
-@login_required
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    if file:
-        file_number = request.form['fileNumber']
-        filename = f"{file_number}_{file.filename}"
-        file_path = os.path.join(current_app.root_path, filename)
-        file.save(file_path)
-        return jsonify({'message': 'File uploaded successfully', 'file_path': file_path}), 200
+        # Handling file upload
+        file = request.files.get('file')
+        if file and file.filename != '':
+            filename = f"{file_number}_{file.filename}"
+            file_path = os.path.join(current_app.root_path, 'uploads', filename)
+            file.save(file_path)  # Save the file to the server
+            
+            # Create a new client file entry
+            new_client_file = ClientFile(
+                file_number=file_number,
+                client_name=client_name,
+                settlement_date=datetime.strptime(settlement_date, '%Y-%m-%d').date(),
+                type_of_client=type_of_client,
+                progress=progress,
+                notes=notes,
+                file_path=filename  # Save the file path to the DB
+            )
+            db.session.add(new_client_file)
+            db.session.commit()
+            return jsonify(new_client_file.to_dict()), 201
+        else:
+            return jsonify({'error': 'File is required or not selected'}), 400
 
-@current_app.route('/api/client_files/<int:id>', methods=['PUT'])
-@login_required
-def update_client_file(id):
-    data = request.json
-    client_file = ClientFile.query.get_or_404(id)
-    
-    client_file.file_number = data['file_number']
-    client_file.client_name = data['client_name']
-    client_file.address = data['address']
-    client_file.status = data['status']
-    client_file.settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
-    client_file.type_of_settlement = data['type_of_settlement']
-    client_file.type_of_client = data['type_of_client']
-    client_file.notes = data.get('notes', client_file.notes)
-    
-    db.session.commit()
-    return jsonify({'message': 'Client file updated successfully'})
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500

@@ -1,65 +1,177 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Files - Ikon Conveyancing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='ClientFiles/style.css') }}">
-    <style>
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
-        }
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Client Files - Ikon Conveyancing</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='ClientFiles/style.css') }}">
+        <style>
+            body, html {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                height: 100%;
+                background: #f4f4f4;
+            }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
+            /* Top Border Line */
+            .top-line {
+                height: 4px;
+                background-color: #0056b3;
+            }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
+            .container {
+                display: grid;
+                grid-template-columns: 250px auto;
+                height: 100%;
+            }
 
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <nav class="navigation">
-            <ul>
-                <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
-                <li class="active"><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
-                <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
-                <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li><a href="#"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
-                <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
-                <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
-            </ul>
-        </nav>
-        <main class="main-content">
-            <div class="file-list">
+            .navigation {
+                background-color: #2c3e50;
+                color: white;
+                padding: 15px;
+            }
+
+            .navigation ul {
+                list-style: none;
+                padding: 0;
+            }
+
+            .navigation ul li a {
+                color: white;
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                text-decoration: none;
+            }
+
+            .navigation ul li a ion-icon {
+                margin-right: 10px;
+            }
+
+            .navigation ul li a:hover {
+                background-color: #34495e;
+            }
+
+            .main-content {
+                padding: 20px;
+                overflow: auto;
+            }
+
+            .filters, .file-details {
+                background: white;
+                padding: 20px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            }
+
+            label {
+                display: block;
+                margin-bottom: 8px;
+            }
+
+            input[type="text"], select, input[type="date"], textarea {
+                width: 100%;
+                padding: 10px;
+                margin-top: 5px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+            button {
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                margin-top: 10px;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+            button:hover {
+                background-color: #003d7a;
+            }
+
+            /* Modal styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0, 0, 0, 0.4);
+                align-items: center;
+                justify-content: center;
+                display: flex;
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 40%;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                border-radius: 8px;
+            }
+
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .close:hover {
+                color: black;
+            }
+
+            /* Styling for entries */
+            .client-entry {
+                background: #fff;
+                padding: 15px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+            }
+
+            .client-entry:hover {
+                background-color: #f1f1f1;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .client-entry p {
+                margin: 5px 0;
+            }
+
+            .client-entry strong {
+                display: inline-block;
+                width: 120px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Top Line for visual appeal -->
+        <div class="top-line"></div>
+
+        <div class="container">
+            <nav class="navigation">
+                <ul>
+                    <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                    <li class="active"><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                    <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
+                    <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
+                    <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                    <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
+                    <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
+                </ul>
+            </nav>
+            <main class="main-content">
                 <div class="filters">
                     <label for="status">Status:</label>
                     <select id="status">
@@ -79,29 +191,117 @@
                     <input type="text" id="property-address" placeholder="Enter address">
                     <button id="apply-filters">Apply Filters</button>
                     <button id="clear-filters">Clear Filters</button>
-                    
+                    <button id="addClientBtn">Add Client</button>
                 </div>
-                <div class="file-entries" id="file-entries">
+                <div id="clientEntries" class="file-entries">
                     <!-- File entries will be dynamically loaded here -->
                 </div>
+            </main>
+        </div>
+
+        <!-- Modal for adding or editing client -->
+        <div id="clientFormPopup" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="togglePopup(false)">&times;</span>
+                <form id="clientForm" enctype="multipart/form-data">
+                    <label for="fileNumber">File Number:</label>
+                    <input type="text" id="fileNumber" name="fileNumber">
+                    <label for="clientName">Client Name:</label>
+                    <input type="text" id="clientName" name="clientName">
+                    <label for="settlementDate">Settlement Date:</label>
+                    <input type="date" id="settlementDate" name="settlementDate">
+                    <label for="typeOfClient">Type of Client:</label>
+                    <select id="typeOfClient" name="typeOfClient">
+                        <option value="vendor">Vendor</option>
+                        <option value="purchaser">Purchaser</option>
+                    </select>
+                    <label for="progress">Progress:</label>
+                    <select id="progress" name="progress">
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In-Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <label for="notes">Notes:</label>
+                    <textarea id="notes" name="notes"></textarea>
+                    <label for="fileUpload">Upload File:</label>
+                    <input type="file" id="fileUpload" name="file">
+                    <button type="button" onclick="submitClientForm()">Submit</button>
+                </form>
             </div>
-            <div class="file-details">
-                <h2>File Details</h2>
-                <div class="details-content" contenteditable="true">
-                    <!-- File details will be dynamically loaded here -->
-                </div>
-                <div class="file-upload">
-                    <label for="file-upload">Upload File:</label>
-                    <input type="file" id="file-upload" name="file-upload">
-                </div>
-                <button id="save-details">Save Details</button>
-            </div>
-        </main>
-    </div>
+        </div>
+
+        <script type="module" src="https://unpkg.com/
+        <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+        <script>
+            // Modal toggle
+            function togglePopup(show) {
+                const modal = document.getElementById('clientFormPopup');
+                modal.style.display = show ? 'flex' : 'none';
+            }
+
+            // Add client button functionality
+            document.getElementById('addClientBtn').addEventListener('click', function() {
+                document.getElementById('clientForm').reset(); // Reset form before showing modal
+                togglePopup(true);
+            });
+
+            // Submit client form data
+            function submitClientForm() {
+        const formData = new FormData(document.getElementById('clientForm'));
+
+        // Send form data to the backend via Fetch
+        fetch('/api/client_files', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Form submission failed.');
+            }
+        })
+        .then(data => {
+            console.log('Success:', data);
+            // Optionally add a success message or reload the entries
+            addClientEntryToDOM(data);  // Update DOM with the new entry
+            togglePopup(false);         // Close the modal
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('There was an error submitting the form. Please try again.');
+        });
+    }
+        // Function to dynamically add the new client entry to the DOM
+        function addClientEntryToDOM(clientData) {
+            const newEntryDiv = document.createElement('div');
+            newEntryDiv.className = 'client-entry';
+            newEntryDiv.innerHTML = `
+                <p><strong>File Number:</strong> ${clientData.fileNumber}</p>
+                <p><strong>Client Name:</strong> ${clientData.clientName}</p>
+                <p><strong>Settlement Date:</strong> ${clientData.settlementDate}</p>
+                <p><strong>Type of Client:</strong> ${clientData.typeOfClient}</p>
+                <p><strong>Progress:</strong> ${clientData.progress}</p>
+                <p><strong>Notes:</strong> ${clientData.notes}</p>
+            `;
+            document.getElementById('clientEntries').appendChild(newEntryDiv);
+        }
 
 
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-    <script src="{{ url_for('static', filename='client_files.js') }}"></script>
-</body>
-</html>
+            // Load client entries when the page is loaded
+            window.onload = function() {
+                fetch('/api/client_files')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(client => addClientEntryToDOM(client)); // Add each client entry to the DOM
+                })
+                .catch(error => {
+                    console.error('Error loading client entries:', error);
+                });
+            };
+        </script>
+    </body>
+    </html>
+

@@ -47,9 +47,10 @@ class ClientFile(db.Model):
     address = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), nullable=False)
     settlement_date = db.Column(db.Date, nullable=False)
-    type_of_settlement = db.Column(db.String(50), nullable=False)  # Add this line
+    type_of_settlement = db.Column(db.String(50), nullable=False)
     type_of_client = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
+    file_path = db.Column(db.String(255), nullable=True)  # Path to the uploaded file
     checklist_items = db.relationship('ChecklistItem', backref='client_file', lazy=True)
 
     def to_dict(self):
@@ -60,7 +61,10 @@ class ClientFile(db.Model):
             'address': self.address,
             'status': self.status,
             'settlement_date': self.settlement_date.isoformat(),
-            'notes': self.notes
+            'type_of_settlement': self.type_of_settlement,
+            'type_of_client': self.type_of_client,
+            'notes': self.notes,
+            'file_path': self.file_path  # Include file path in the response
         }
 
 class ChecklistItem(db.Model):
@@ -75,6 +79,7 @@ class ChecklistItem(db.Model):
             'description': self.description,
             'status': self.status
         }
+
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -92,4 +97,3 @@ class Event(db.Model):
             'priority': self.priority,
             'user_id': self.user_id
         }
-''
