@@ -1,15 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Templates - Ikon Conveyancing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='Email/style.css') }}">
-</head>
+    <style>
+body, html {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    height: 100%;
+    background: #f4f4f4;
+}
 
+/* Main content and button styles */
+.container {
+    display: grid;
+    grid-template-columns: 250px auto;
+    height: 100%;
+}
+
+.navigation {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px;
+}
+
+.navigation ul {
+    list-style: none;
+    padding: 0;
+}
+
+.navigation ul li a {
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.navigation ul li a:hover {
+    background-color: #34495e;
+}
+
+button {
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #003d7a;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;  /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);  /* Dark background */
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;  /* Smaller width for better appearance */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
+
+/* Input and textarea styles */
+form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+form input[type="text"], form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Align form buttons */
+form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+
+    </style>
+</head>
 <body>
+
     <div class="container">
         <nav class="navigation">
             <ul>
@@ -17,44 +142,37 @@
                 <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
                 <li class="active"><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
                 <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li><a href="#"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
                 <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
                 <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
             </ul>
         </nav>
-
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Left Section: Email Templates List -->
-            <div class="email-templates-section">
-                <h2>Email Templates</h2>
-                <ul class="template-list">
-                    <!-- Templates will be loaded dynamically -->
-                </ul>
-                <button id="new-template" class="new-template-btn">New Template</button>
-            </div>
-
-            <!-- Right Section: Template Details Form -->
-            <div class="email-template-form-section" id="template-form-container" style="display: none;">
-                <h2>Template Details</h2>
-                <form id="template-form">
-                    <label for="subject">Subject:</label>
-                    <input type="text" id="subject" required>
-                    
-                    <label for="body">Body:</label>
-                    <textarea id="body" rows="10" required></textarea>
-
-                    <button type="submit" class="save-btn">Save Template</button>
-                    <button type="button" id="cancel-form" class="cancel-btn">Cancel</button>
-                </form>
+            <h2>Email Templates</h2>
+            <button id="new-template-btn">New Template</button>
+            <div id="template-entries" class="template-entries">
+                <!-- Email template entries will be dynamically loaded here -->
             </div>
         </main>
     </div>
 
-    <!-- Icon library for ion-icons -->
+    <!-- Modal for adding or editing an email template -->
+    <div id="emailTemplateFormPopup" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleEmailPopup(false)">&times;</span>
+            <form id="emailTemplateForm">
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" name="subject" required>
+                <label for="body">Body:</label>
+                <textarea id="body" name="body" rows="10" required></textarea>
+                <button type="button" onclick="submitEmailTemplateForm()">Submit</button>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="{{ url_for('static', filename='email.js') }}"></script>
-</body>
 
+</body>
 </html>

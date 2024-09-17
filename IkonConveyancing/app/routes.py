@@ -88,26 +88,33 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# API to manage email templates
+# API to manage email templates (CREATE and GET for all templates)
 @current_app.route('/api/templates', methods=['GET', 'POST'])
 @login_required
 def manage_templates():
     if request.method == 'POST':
         # Create a new template
-        data = request.json
+        # Use `request.form` to match the FormData from the frontend
+        subject = request.form.get('subject')
+        body = request.form.get('body')
+
+        if not subject or not body:
+            return jsonify({'message': 'Subject and body are required'}), 400
+
         new_template = EmailTemplate(
-            subject=data['subject'],
-            body=data['body'],
+            subject=subject,
+            body=body,
             user_id=current_user.id
         )
         db.session.add(new_template)
         db.session.commit()
-        return jsonify({'message': 'Template created successfully'}), 201
+        return jsonify(new_template.to_dict()), 201
     
     # Retrieve all templates for the logged-in user
     templates = EmailTemplate.query.filter_by(user_id=current_user.id).all()
     return jsonify([template.to_dict() for template in templates])
 
+# API for managing a single email template (GET, UPDATE, DELETE)
 @current_app.route('/api/templates/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def manage_single_template(id):
@@ -119,9 +126,14 @@ def manage_single_template(id):
 
     elif request.method == 'PUT':
         # Update an existing template
-        data = request.json
-        template.subject = data['subject']
-        template.body = data['body']
+        subject = request.form.get('subject')
+        body = request.form.get('body')
+
+        if not subject or not body:
+            return jsonify({'message': 'Subject and body are required'}), 400
+
+        template.subject = subject
+        template.body = body
         db.session.commit()
         return jsonify({'message': 'Template updated successfully'})
 
