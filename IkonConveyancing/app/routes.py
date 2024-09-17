@@ -102,7 +102,7 @@ def manage_templates():
         )
         db.session.add(new_template)
         db.session.commit()
-        return jsonify({'message': 'Template created successfully'}), 201
+        return jsonify(new_template.to_dict()), 201
     
     # Retrieve all templates for the logged-in user
     templates = EmailTemplate.query.filter_by(user_id=current_user.id).all()
@@ -123,13 +123,8 @@ def manage_single_template(id):
         template.subject = data['subject']
         template.body = data['body']
         db.session.commit()
-        return jsonify({'message': 'Template updated successfully'})
+        return jsonify(template.to_dict())
 
-    elif request.method == 'DELETE':
-        # Delete the template
-        db.session.delete(template)
-        db.session.commit()
-        return jsonify({'message': 'Template deleted successfully'})
     elif request.method == 'DELETE':
         # Delete the template
         db.session.delete(template)

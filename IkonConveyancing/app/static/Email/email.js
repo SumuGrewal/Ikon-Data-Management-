@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const templateForm = document.getElementById('template-form');
     const subjectInput = document.getElementById('subject');
     const bodyInput = document.getElementById('body');
     const templateList = document.querySelector('.template-list');
     const templateFormContainer = document.getElementById('template-form-container');
-    const newTemplateBtn = document.getElementById('new-template');
+    const addTemplateBtn = document.getElementById('new-template');
     const cancelFormBtn = document.getElementById('cancel-form');
 
     let editingTemplateId = null;
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     // Handle form submission
-    templateForm.addEventListener('submit', function(e) {
+    templateForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const subject = subjectInput.value;
         const body = bodyInput.value;
@@ -32,31 +32,31 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({ subject, body }),
         })
-        .then(response => response.json())
-        .then(data => {
-            if (editingTemplateId) {
-                updateTemplateInList(data);
-            } else {
-                addTemplateToList(data);
-            }
-            templateFormContainer.style.display = 'none';
-            templateForm.reset();
-            editingTemplateId = null;
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (editingTemplateId) {
+                    updateTemplateInList(data);
+                } else {
+                    addTemplateToList(data);
+                }
+                templateFormContainer.style.display = 'none';
+                templateForm.reset();
+                editingTemplateId = null;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     });
 
-    // Handle new template button click
-    newTemplateBtn.addEventListener('click', function() {
+    // Handle add template button click
+    addTemplateBtn.addEventListener('click', function () {
         templateFormContainer.style.display = 'block';
         templateForm.reset();
         editingTemplateId = null;
     });
 
     // Handle cancel button click
-    cancelFormBtn.addEventListener('click', function() {
+    cancelFormBtn.addEventListener('click', function () {
         templateFormContainer.style.display = 'none';
         templateForm.reset();
         editingTemplateId = null;
@@ -111,12 +111,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/api/templates/${id}`, {
             method: 'DELETE',
         })
-        .then(response => response.json())
-        .then(data => {
-            document.querySelector(`li[data-id='${id}']`).remove();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector(`li[data-id='${id}']`).remove();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     }
 });

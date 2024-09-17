@@ -1,14 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Templates - Ikon Conveyancing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='Email/style.css') }}">
-</head>
+    <style>
+        body, html {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100%;
+            background-color: #f4f4f4;
+        }
 
+        /* Container and navigation */
+        .container {
+            display: grid;
+            grid-template-columns: 250px auto;
+            height: 100%;
+        }
+
+        .navigation {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+        }
+
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .navigation ul li a {
+            color: white;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .navigation ul li a:hover {
+            background-color: #34495e;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 20px;
+        }
+
+        .template-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .template-list li {
+            padding: 10px;
+            background-color: white;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .template-list button {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .template-list button:hover {
+            background-color: #003d7a;
+        }
+
+        /* Modal form */
+        #template-form-container {
+            background-color: rgba(0, 0, 0, 0.6);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none; /* Initially hidden */
+        }
+
+        #template-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+        }
+
+        #template-form label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        #template-form input, #template-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #template-form button {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #template-form button:hover {
+            background-color: #003d7a;
+        }
+    </style>
+</head>
 <body>
     <div class="container">
         <nav class="navigation">
@@ -17,44 +132,157 @@
                 <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
                 <li class="active"><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
                 <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li><a href="#"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
                 <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
-                <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
             </ul>
         </nav>
-
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Left Section: Email Templates List -->
-            <div class="email-templates-section">
-                <h2>Email Templates</h2>
-                <ul class="template-list">
-                    <!-- Templates will be loaded dynamically -->
-                </ul>
-                <button id="new-template" class="new-template-btn">New Template</button>
-            </div>
-
-            <!-- Right Section: Template Details Form -->
-            <div class="email-template-form-section" id="template-form-container" style="display: none;">
-                <h2>Template Details</h2>
-                <form id="template-form">
-                    <label for="subject">Subject:</label>
-                    <input type="text" id="subject" required>
-                    
-                    <label for="body">Body:</label>
-                    <textarea id="body" rows="10" required></textarea>
-
-                    <button type="submit" class="save-btn">Save Template</button>
-                    <button type="button" id="cancel-form" class="cancel-btn">Cancel</button>
-                </form>
-            </div>
+            <h2>Email Templates</h2>
+            <ul class="template-list">
+                <!-- Templates will be dynamically added here -->
+            </ul>
+            <button id="new-template">New Template</button>
         </main>
     </div>
 
-    <!-- Icon library for ion-icons -->
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-    <script src="{{ url_for('static', filename='email.js') }}"></script>
-</body>
+    <!-- Modal for adding or editing templates -->
+    <div id="template-form-container">
+        <form id="template-form">
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" required>
+            
+            <label for="body">Body:</label>
+            <textarea id="body" rows="10" required></textarea>
 
+            <button type="submit">Save</button>
+            <button type="button" id="cancel-form">Cancel</button>
+        </form>
+    </div>
+
+    <!-- JavaScript to handle the form and template list -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const templateForm = document.getElementById('template-form');
+            const subjectInput = document.getElementById('subject');
+            const bodyInput = document.getElementById('body');
+            const templateList = document.querySelector('.template-list');
+            const templateFormContainer = document.getElementById('template-form-container');
+            const addTemplateBtn = document.getElementById('new-template');
+            const cancelFormBtn = document.getElementById('cancel-form');
+
+            let editingTemplateId = null;
+
+            // Load existing templates
+            fetch('/api/templates')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(template => addTemplateToList(template));
+                });
+
+            // Handle form submission
+            templateForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const subject = subjectInput.value;
+                const body = bodyInput.value;
+
+                const url = editingTemplateId ? `/api/templates/${editingTemplateId}` : '/api/templates';
+                const method = editingTemplateId ? 'PUT' : 'POST';
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ subject, body }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (editingTemplateId) {
+                            updateTemplateInList(data);
+                        } else {
+                            addTemplateToList(data);
+                        }
+                        templateFormContainer.style.display = 'none';
+                        templateForm.reset();
+                        editingTemplateId = null;
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            });
+
+            // Handle add template button click
+            addTemplateBtn.addEventListener('click', function () {
+                templateFormContainer.style.display = 'flex';
+                templateForm.reset();
+                editingTemplateId = null;
+            });
+
+            // Handle cancel button click
+            cancelFormBtn.addEventListener('click', function () {
+                templateFormContainer.style.display = 'none';
+                templateForm.reset();
+                editingTemplateId = null;
+            });
+
+            // Function to add a new template to the list
+            function addTemplateToList(template) {
+                const li = document.createElement('li');
+                li.textContent = template.subject;
+                li.dataset.id = template.id;
+
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Edit';
+                editBtn.addEventListener('click', () => editTemplate(template));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => deleteTemplate(template.id));
+
+                li.appendChild(editBtn);
+                li.appendChild(deleteBtn);
+                templateList.appendChild(li);
+            }
+
+            // Function to update a template in the list
+            function updateTemplateInList(template) {
+                const li = document.querySelector(`li[data-id='${template.id}']`);
+                li.textContent = template.subject;
+
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Edit';
+                editBtn.addEventListener('click', () => editTemplate(template));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => deleteTemplate(template.id));
+
+                li.appendChild(editBtn);
+                li.appendChild(deleteBtn);
+            }
+
+            // Function to edit a template
+            function editTemplate(template) {
+                templateFormContainer.style.display = 'flex';
+                subjectInput.value = template.subject;
+                bodyInput.value = template.body;
+                editingTemplateId = template.id;
+            }
+
+            // Function to delete a template
+            function deleteTemplate(id) {
+                fetch(`/api/templates/${id}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelector(`li[data-id='${id}']`).remove();
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            }
+        });
+    </script>
+</body>
 </html>
