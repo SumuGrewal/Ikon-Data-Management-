@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Email - Ikon Conveyancing</title>
+    <title>Email Templates - Ikon Conveyancing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='Email/style.css') }}">
 </head>
 
@@ -22,36 +22,36 @@
                 <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
             </ul>
         </nav>
+
+        <!-- Main Content -->
         <main class="main-content">
-            <div class="email-templates">
-                <button id="new-template">New Template</button>
-                <div class="template-list">
-                    <!-- List of email templates will be dynamically loaded here -->
-                </div>
+            <!-- Left Section: Email Templates List -->
+            <div class="email-templates-section">
+                <h2>Email Templates</h2>
+                <ul class="template-list">
+                    <!-- Templates will be loaded dynamically -->
+                </ul>
+                <button id="new-template" class="new-template-btn">New Template</button>
             </div>
-            <div class="template-details">
-                <h2>Email Template Details</h2>
+
+            <!-- Right Section: Template Details Form -->
+            <div class="email-template-form-section" id="template-form-container" style="display: none;">
+                <h2>Template Details</h2>
                 <form id="template-form">
                     <label for="subject">Subject:</label>
-                    <input type="text" id="subject" name="subject" required>
-                    <label for="settlement-date">Settlement Date:</label>
-                    <input type="date" id="settlement-date" name="settlement-date" required>
-                    <label for="client-name">Client Name:</label>
-                    <input type="text" id="client-name" name="client-name" required>
-                    <label for="address">Address:</label>
-                    <input type="text" id="address" name="address" required>
+                    <input type="text" id="subject" required>
+                    
                     <label for="body">Body:</label>
-                    <textarea id="body" name="body" required></textarea>
-                    <label for="recipient">Recipient:</label>
-                    <input type="email" id="recipient" name="recipient" required>
-                    <button type="submit">Save Template</button>
-                    <button type="button" id="delete-template">Delete Template</button>
-                    <button type="button" id="send-email">Send Email</button>
+                    <textarea id="body" rows="10" required></textarea>
+
+                    <button type="submit" class="save-btn">Save Template</button>
+                    <button type="button" id="cancel-form" class="cancel-btn">Cancel</button>
                 </form>
             </div>
         </main>
     </div>
 
+    <!-- Icon library for ion-icons -->
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="{{ url_for('static', filename='email.js') }}"></script>

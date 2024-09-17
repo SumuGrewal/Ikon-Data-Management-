@@ -1,5 +1,4 @@
-/* email.css */
-
+/* Global styles */
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f4f4f4;
@@ -12,10 +11,10 @@ body {
     height: 100vh;
 }
 
+/* Sidebar Navigation */
 .navigation {
     width: 250px;
     background-color: #162938;
-    color: #fff;
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
@@ -32,7 +31,6 @@ body {
 .navigation ul li a {
     color: #fff;
     text-decoration: none;
-    font-size: 1.1em;
     display: flex;
     align-items: center;
 }
@@ -47,92 +45,109 @@ body {
     border-radius: 5px;
 }
 
+/* Main Content */
 .main-content {
-    flex: 1;
-    padding: 20px;
     display: flex;
+    flex: 1;
+    padding: 40px;
     gap: 20px;
 }
 
-.email-templates {
-    flex: 1;
+.email-templates-section, .email-template-form-section {
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.email-templates button {
-    padding: 10px;
-    border: none;
-    background-color: #162938;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 20px;
-}
-
-.email-templates button:hover {
-    background-color: #1e3a5f;
+.email-templates-section {
+    width: 300px;
 }
 
 .template-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    margin-top: 20px;
+    list-style-type: none;
+    padding: 0;
 }
 
-.template-list .template-item {
+.template-list li {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.new-template-btn {
+    background-color: #0099FF;
+    color: #fff;
+    border: none;
     padding: 10px;
-    background-color: #f9f9f9;
+    width: 100%;
     border-radius: 5px;
     cursor: pointer;
 }
 
-.template-list .template-item:hover {
-    background-color: #e0e0e0;
+.new-template-btn:hover {
+    background-color: #007acc;
 }
 
-.template-details {
-    flex: 2;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.delete-btn, .edit-btn {
+    background-color: #FF6666;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-left: 5px;
 }
 
-.template-details h2 {
+.delete-btn:hover, .edit-btn:hover {
+    background-color: #cc0000;
+}
+
+.email-template-form-section {
+    flex: 1;
+}
+
+.email-template-form-section h2 {
     margin-bottom: 20px;
-    font-size: 1.5em;
-    color: #162938;
 }
 
-.template-details form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.template-details form label {
+form label {
+    display: block;
+    margin-bottom: 10px;
     font-weight: bold;
 }
 
-.template-details form input,
-.template-details form textarea {
+form input, form textarea {
+    width: 100%;
     padding: 10px;
+    margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
-.template-details form button {
-    padding: 10px;
+form .save-btn {
+    background-color: #0099FF;
+    color: white;
     border: none;
-    background-color: #162938;
-    color: #fff;
+    padding: 10px;
     border-radius: 5px;
     cursor: pointer;
 }
 
-.template-details form button:hover {
-    background-color: #1e3a5f;
+form .save-btn:hover {
+    background-color: #007acc;
+}
+
+form .cancel-btn {
+    background-color: #FF6666;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+form .cancel-btn:hover {
+    background-color: #cc0000;
 }

@@ -45,27 +45,22 @@ class ClientFile(db.Model):
     file_number = db.Column(db.String(20), unique=False, nullable=False)
     client_name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(200), nullable=False)
-    status = db.Column(db.String(20), nullable=False)
     settlement_date = db.Column(db.Date, nullable=False)
-    type_of_settlement = db.Column(db.String(50), nullable=False)
     type_of_client = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
-    file_path = db.Column(db.String(255), nullable=True)  # Path to the uploaded file
-    checklist_items = db.relationship('ChecklistItem', backref='client_file', lazy=True)
+    progress = db.Column(db.String(50), nullable=False)  # Add this line
 
     def to_dict(self):
         return {
             'id': self.id,
             'file_number': self.file_number,
             'client_name': self.client_name,
-            'address': self.address,
-            'status': self.status,
             'settlement_date': self.settlement_date.isoformat(),
-            'type_of_settlement': self.type_of_settlement,
             'type_of_client': self.type_of_client,
-            'notes': self.notes,
-            'file_path': self.file_path  # Include file path in the response
+            'progress': self.progress,  # Add this line to the dict
+            'notes': self.notes
         }
+
 
 class ChecklistItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
