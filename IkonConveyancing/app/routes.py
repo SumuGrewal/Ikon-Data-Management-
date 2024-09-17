@@ -227,41 +227,55 @@ def events():
 def checklist():
     return render_template('checklist.html')
 
-@current_app.route('/api/client_files', methods=['POST'])
+# Client files API for adding/updating clients
+@current_app.route('/api/client_files', methods=['POST', 'PUT'])
 @login_required
 def manage_client_files():
     try:
-        # Assuming you're using a form with 'multipart/form-data'
         client_name = request.form['clientName']
-        email = request.form['email']  # Ensure this field is captured
+        email = request.form['email']
         contact_info = request.form['contact']
         address = request.form['address']
         settlement_date = request.form['settlementDate']
         type_of_client = request.form['typeOfClient']
         property_type = request.form['propertyType']
         notes = request.form['notes']
-        
+
         # Handle document upload (if any)
         document = request.files['documents'] if 'documents' in request.files else None
         document_path = None
         if document:
-            document_path = save_document(document)  # Save the document and return its path
+            document_path = save_document(document)
 
-        # Create a new client file
-        new_client_file = ClientFile(
-            client_name=client_name,
-            email=email,  # Include the email field
-            contact_info=contact_info,
-            address=address,
-            settlement_date=datetime.strptime(settlement_date, '%Y-%m-%d').date(),
-            type_of_client=type_of_client,
-            property_type=property_type,
-            notes=notes,
-            documents=document_path,  # Save the document path if uploaded
-            user_id=current_user.id
-        )
+        # Check if updating or adding new
+        if request.method == 'PUT':
+            client_id = request.form.get('clientId')
+            client_file = ClientFile.query.get_or_404(client_id)
+            client_file.client_name = client_name
+            client_file.email = email
+            client_file.contact_info = contact_info
+            client_file.address = address
+            client_file.settlement_date = datetime.strptime(settlement_date, '%Y-%m-%d').date()
+            client_file.type_of_client = type_of_client
+            client_file.property_type = property_type
+            client_file.notes = notes
+            if document_path:
+                client_file.documents = document_path
+        else:
+            new_client_file = ClientFile(
+                client_name=client_name,
+                email=email,
+                contact_info=contact_info,
+                address=address,
+                settlement_date=datetime.strptime(settlement_date, '%Y-%m-%d').date(),
+                type_of_client=type_of_client,
+                property_type=property_type,
+                notes=notes,
+                documents=document_path,
+                user_id=current_user.id
+            )
+            db.session.add(new_client_file)
 
-        db.session.add(new_client_file)
         db.session.commit()
         return jsonify(new_client_file.to_dict()), 201
 

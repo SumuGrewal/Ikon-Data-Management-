@@ -7,7 +7,7 @@
     <style>
         body, html {
             margin: 0;
-            font-family: 'Poppins', sans-serif;
+            font-family: Arial, sans-serif;
             height: 100%;
             background: #f4f4f4;
         }
@@ -152,16 +152,16 @@
         <!-- Navigation Sidebar -->
         <nav class="navigation">
             <ul>
-                <li class="active"><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
-                <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
-                <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
-                <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
-                <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
-                <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
-                <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-                <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+                <li><a href="/dashboard"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                <li><a href="/client_files"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                <li><a href="/send_email"><ion-icon name="mail"></ion-icon> Send Email</a></li>
+                <li><a href="/calendar"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
+                <li class="active"><a href="/checklist"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="/logout"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
             </ul>
+            <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+            <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+            <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
         </nav>
 
         <!-- Main content with filters and client list -->
@@ -208,7 +208,7 @@
         <div class="modal-content">
             <span class="close" onclick="togglePopup(false)">&times;</span>
             <h2>Client Form</h2>
-            <form id="clientForm">
+            <form id="clientForm" enctype="multipart/form-data">
                 <input type="hidden" id="clientId" name="clientId">
                 <label for="clientName">Client Name:</label>
                 <input type="text" id="clientName" name="clientName" required>
@@ -242,11 +242,11 @@
                 <label for="notes">Notes:</label>
                 <textarea id="notes" name="notes"></textarea>
 
+                <label for="reminder">Reminder (Date & Time):</label>
+                <input type="datetime-local" id="reminder" name="reminder">
+
                 <label for="documents">Upload Documents:</label>
                 <input type="file" id="documents" name="documents" multiple>
-
-                <label for="reminderDatetime">Set Reminder:</label>
-                <input type="datetime-local" id="reminderDatetime" name="reminderDatetime">
 
                 <button type="button" onclick="submitClientForm()">Submit</button>
             </form>
@@ -254,47 +254,49 @@
     </div>
 
     <script>
-        // Modal toggle
         function togglePopup(show, client = null) {
             const modal = document.getElementById('clientFormPopup');
             modal.style.display = show ? 'flex' : 'none';
-
+    
             if (client) {
-                document.getElementById('clientId').value = client.id;
-                document.getElementById('clientName').value = client.client_name;
-                document.getElementById('email').value = client.email;
-                document.getElementById('contact').value = client.contact;
-                document.getElementById('address').value = client.address;
-                document.getElementById('settlementDate').value = client.settlement_date;
-                document.getElementById('typeOfClient').value = client.type_of_client;
-                document.getElementById('propertyType').value = client.property_type;
-                document.getElementById('notes').value = client.notes;
+                // Field mappings between frontend and backend response
+                document.getElementById('clientId').value = client.id || '';
+                document.getElementById('clientName').value = client.client_name || '';
+                document.getElementById('email').value = client.email || '';
+                document.getElementById('contact').value = client.contact || '';
+                document.getElementById('address').value = client.address || '';
+                document.getElementById('settlementDate').value = client.settlement_date || '';
+                document.getElementById('typeOfClient').value = client.type_of_client || '';
+                document.getElementById('propertyType').value = client.property_type || '';
+                document.getElementById('notes').value = client.notes || '';
+                document.getElementById('reminder').value = client.reminder || '';
             } else {
                 document.getElementById('clientForm').reset();
             }
         }
 
-        // Add client button functionality
         document.getElementById('addClientBtn').addEventListener('click', function() {
             togglePopup(true);
         });
 
-        // Submit client form data
         function submitClientForm() {
             const formData = new FormData(document.getElementById('clientForm'));
             const clientId = document.getElementById('clientId').value;
             const url = clientId ? `/api/client_files/${clientId}` : '/api/client_files';
             const method = clientId ? 'PUT' : 'POST';
-
+    
             fetch(url, {
                 method: method,
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Success:', data);
                 togglePopup(false);
-                loadClientFiles();
+                if (clientId) {
+                    updateClientInDOM(data);
+                } else {
+                    addClientToDOM(data);
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -302,17 +304,28 @@
             });
         }
 
-        // Load client entries
-        function loadClientFiles() {
-            fetch('/api/client_files')
-            .then(response => response.json())
-            .then(data => {
-                const clientEntries = document.getElementById('clientEntries');
-                clientEntries.innerHTML = '';
-                data.forEach(client => {
-                    const clientDiv = document.createElement('div');
-                    clientDiv.className = 'file-entry';
-                    clientDiv.innerHTML = `
+        function addClientToDOM(client) {
+            const clientEntries = document.getElementById('clientEntries');
+            const clientDiv = document.createElement('div');
+            clientDiv.className = 'file-entry';
+            clientDiv.innerHTML = `
+                <p><strong>Client Name:</strong> ${client.client_name}</p>
+                <p><strong>Email:</strong> ${client.email}</p>
+                <p><strong>Contact:</strong> ${client.contact}</p>
+                <p><strong>Address:</strong> ${client.address}</p>
+                <p><strong>Settlement Date:</strong> ${client.settlement_date}</p>
+                <p><strong>Type of Client:</strong> ${client.type_of_client}</p>
+                <p><strong>Type of Property:</strong> ${client.property_type}</p>
+                <button onclick='togglePopup(true, ${JSON.stringify(client)})'>Edit</button>
+            `;
+            clientEntries.appendChild(clientDiv);
+        }
+
+        function updateClientInDOM(client) {
+            const clientDivs = document.querySelectorAll('.file-entry');
+            clientDivs.forEach(div => {
+                if (div.querySelector('p').innerText.includes(client.client_name)) {
+                    div.innerHTML = `
                         <p><strong>Client Name:</strong> ${client.client_name}</p>
                         <p><strong>Email:</strong> ${client.email}</p>
                         <p><strong>Contact:</strong> ${client.contact}</p>
@@ -322,13 +335,21 @@
                         <p><strong>Type of Property:</strong> ${client.property_type}</p>
                         <button onclick='togglePopup(true, ${JSON.stringify(client)})'>Edit</button>
                     `;
-                    clientEntries.appendChild(clientDiv);
-                });
+                }
+            });
+        }
+
+        function loadClientFiles() {
+            fetch('/api/client_files')
+            .then(response => response.json())
+            .then(data => {
+                const clientEntries = document.getElementById('clientEntries');
+                clientEntries.innerHTML = ''; 
+                data.forEach(client => addClientToDOM(client)); 
             })
             .catch(error => console.error('Error loading client files:', error));
         }
 
-        // Load urgent reminders
         function loadUrgentReminders() {
             fetch('/api/get_urgent_reminders')
             .then(response => response.json())
@@ -348,11 +369,18 @@
             .catch(error => console.error('Error loading reminders:', error));
         }
 
-        // Initialize client files and reminders on load
+        function checkRemindersPeriodically() {
+            setInterval(() => {
+                loadUrgentReminders();
+            }, 60000);
+        }
+
         window.onload = function() {
             loadClientFiles();
             loadUrgentReminders();
+            checkRemindersPeriodically();
         };
     </script>
+    
 </body>
 </html>
