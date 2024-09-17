@@ -239,43 +239,7 @@ def client_details(file_number):
     client_file = ClientFile.query.filter_by(file_number=file_number).first_or_404()
     return render_template('client_details.html', client_file=client_file)
 
-@current_app.route('/api/client_files', methods=['POST'])
-@login_required
-def add_client_file():
-    data = request.json
-    file_number = data.get('file_number')
-    logging.debug(f"Received file_number: {file_number}")
-    
-    if not file_number:
-        logging.debug("File number is missing in the request.")
-        return jsonify({'message': 'File number is required'}), 400
-    
-    existing_file = ClientFile.query.filter_by(file_number=file_number).first()
-    
-    if existing_file:
-        logging.debug(f"File number {file_number} already exists in the database.")
-        return jsonify({'message': f'File number {file_number} already exists'}), 400
-
-    try:
-        settlement_date = datetime.strptime(data['settlement_date'], '%Y-%m-%d').date()
-        new_file = ClientFile(
-            file_number=['file_number'],
-            client_name=data['client_name'],
-            address=data['address'],
-            status=data['status'],
-            settlement_date=settlement_date,
-            type_of_settlement=data['type_of_settlement'],
-            type_of_client=data['type_of_client'],
-            notes=data.get('notes')
-        )
-        db.session.add(new_file)
-        db.session.commit()
-        logging.debug(f"Client file with file_number {file_number} added successfully.")
-        return jsonify({'message': 'Client file added successfully'}), 201
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Error adding client file: {str(e)}")
-        return jsonify({'message': str(e)}), 500
+ 
 
 @current_app.route('/upload', methods=['POST'])
 @login_required
