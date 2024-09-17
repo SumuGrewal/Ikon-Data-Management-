@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Files - Ikon Conveyancing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='ClientFiles/style.css') }}">
     <style>
         body, html {
             margin: 0;
@@ -14,16 +12,10 @@
             background: #f4f4f4;
         }
 
-        /* Top Border Line */
-        .top-line {
-            height: 4px;
-            background-color: #0056b3;
-        }
-
         .container {
             display: grid;
-            grid-template-columns: 250px auto;
-            height: 100%;
+            grid-template-columns: 250px auto 300px;
+            height: 100vh;
         }
 
         .navigation {
@@ -45,38 +37,34 @@
             text-decoration: none;
         }
 
-        .navigation ul li a ion-icon {
-            margin-right: 10px;
-        }
-
         .navigation ul li a:hover {
             background-color: #34495e;
         }
 
         .main-content {
             padding: 20px;
-            overflow: auto;
+            overflow-y: auto;
         }
 
-        .filters, .file-details {
+        /* Align filters in one line */
+        .filters {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             background: white;
-            padding: 20px;
+            padding: 10px;
             margin-bottom: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
+        .filters label {
+            margin-right: 10px;
         }
 
-        input[type="text"], select, input[type="date"], textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+        .filters input, .filters select {
+            margin-right: 15px;
+            padding: 5px;
         }
 
         button {
@@ -84,7 +72,6 @@
             color: white;
             border: none;
             padding: 10px 20px;
-            margin-top: 10px;
             cursor: pointer;
             border-radius: 4px;
         }
@@ -93,7 +80,24 @@
             background-color: #003d7a;
         }
 
-        /* Modal styles */
+        .file-entry {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .file-entry:hover {
+            background-color: #f1f1f1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-entry p {
+            margin: 5px 0;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -102,18 +106,16 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
             background-color: rgba(0, 0, 0, 0.4);
             align-items: center;
             justify-content: center;
-            display: flex;
         }
 
         .modal-content {
             background-color: #fefefe;
             padding: 20px;
             border: 1px solid #888;
-            width: 40%;
+            width: 50%;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border-radius: 8px;
         }
@@ -130,47 +132,43 @@
             color: black;
         }
 
-        /* Styling for entries */
-        .client-entry {
-            background: #fff;
+        /* Urgent reminder container */
+        .urgent-reminders {
+            background-color: #fff;
             padding: 15px;
-            margin-bottom: 10px;
+            border-left: 1px solid #ddd;
+            overflow-y: auto;
+        }
+
+        .urgent-reminder {
+            background-color: #f8d7da;
+            color: #721c24;
             border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .client-entry:hover {
-            background-color: #f1f1f1;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .client-entry p {
-            margin: 5px 0;
-        }
-
-        .client-entry strong {
-            display: inline-block;
-            width: 120px;
+            margin-bottom: 15px;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- Top Line for visual appeal -->
-    <div class="top-line"></div>
-
     <div class="container">
+        <!-- Navigation Sidebar -->
         <nav class="navigation">
             <ul>
-                <li><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
-                <li class="active"><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
+                <li class="active"><a href="{{ url_for('dashboard') }}"><ion-icon name="home"></ion-icon> Dashboard</a></li>
+                <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
                 <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
                 <li><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
                 <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
                 <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
                 <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
+                <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+                <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+                <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+            </body>
             </ul>
         </nav>
+
+        <!-- Main content with filters and client list -->
         <main class="main-content">
             <div class="filters">
                 <label for="status">Status:</label>
@@ -179,6 +177,7 @@
                     <option value="pending">Pending</option>
                     <option value="finished">Finished</option>
                 </select>
+
                 <label for="sort-by">Sort By:</label>
                 <select id="sort-by">
                     <option value="file-number">File Number</option>
@@ -187,119 +186,203 @@
                     <option value="status">Status</option>
                     <option value="settlement-date">Settlement Date</option>
                 </select>
-                <label for="property-address">Property Address:</label>
-                <input type="text" id="property-address" placeholder="Enter address">
+
                 <button id="apply-filters">Apply Filters</button>
                 <button id="clear-filters">Clear Filters</button>
                 <button id="addClientBtn">Add Client</button>
             </div>
+
+            <!-- Client Entries -->
             <div id="clientEntries" class="file-entries">
-                <!-- File entries will be dynamically loaded here -->
+                <!-- Client entries will be loaded here -->
             </div>
         </main>
-    </div>
 
-    <!-- Modal for adding or editing client -->
+        <!-- Urgent Reminders -->
+        <aside class="urgent-reminders">
+            <h2>Urgent Reminders</h2>
+            <div id="urgentRemindersContainer">
+                <!-- Reminders will be loaded here -->
+            </div>
+        </aside>
+    </div>
+    <div class="urgent-reminders">
+        <h3>Urgent Reminders</h3>
+        <ul id="reminders-list"></ul>
+    </div>
+</main>
+</div>
+
+<script>
+// Load urgent reminders when the page is loaded
+window.onload = function() {
+    fetch('/api/get_urgent_reminders')
+    .then(response => response.json())
+    .then(data => {
+        const remindersList = document.getElementById('reminders-list');
+        remindersList.innerHTML = '';  // Clear any previous reminders
+        if (data.length > 0) {
+            data.forEach(reminder => {
+                const reminderItem = document.createElement('li');
+                reminderItem.textContent = `${reminder.reminder_text} (Due: ${reminder.reminder_datetime}) - Client: ${reminder.client_file}`;
+                remindersList.appendChild(reminderItem);
+            });
+        } else {
+            remindersList.textContent = 'No urgent reminders.';
+        }
+    })
+    .catch(error => console.error('Error fetching reminders:', error));
+};
+</script>
+
+    <!-- Modal for adding/editing client -->
     <div id="clientFormPopup" class="modal">
         <div class="modal-content">
             <span class="close" onclick="togglePopup(false)">&times;</span>
+            <h2>Client Form</h2>
             <form id="clientForm">
-                <label for="fileNumber">File Number:</label>
-                <input type="text" id="fileNumber" name="fileNumber">
+                <input type="hidden" id="clientId" name="clientId">
                 <label for="clientName">Client Name:</label>
-                <input type="text" id="clientName" name="clientName">
+                <input type="text" id="clientName" name="clientName" required>
+                
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="contact">Contact Info:</label>
+                <input type="tel" id="contact" name="contact" required>
+
                 <label for="address">Address:</label>
-                <input type="text" id="address" name="address">
+                <input type="text" id="address" name="address" required>
+
                 <label for="settlementDate">Settlement Date:</label>
-                <input type="date" id="settlementDate" name="settlementDate">
+                <input type="date" id="settlementDate" name="settlementDate" required>
+
                 <label for="typeOfClient">Type of Client:</label>
                 <select id="typeOfClient" name="typeOfClient">
                     <option value="vendor">Vendor</option>
                     <option value="purchaser">Purchaser</option>
                 </select>
-                <label for="progress">Progress:</label>
-                <select id="progress" name="progress">
-                    <option value="pending">Pending</option>
-                    <option value="in-progress">In-Progress</option>
-                    <option value="completed">Completed</option>
+
+                <label for="propertyType">Type of Property:</label>
+                <select id="propertyType" name="propertyType">
+                    <option value="commercial">Commercial</option>
+                    <option value="housing">Housing</option>
+                    <option value="regional">Regional</option>
+                    <option value="land">Land</option>
                 </select>
+
                 <label for="notes">Notes:</label>
                 <textarea id="notes" name="notes"></textarea>
+
+                <label for="documents">Upload Documents:</label>
+                <input type="file" id="documents" name="documents" multiple>
+
                 <button type="button" onclick="submitClientForm()">Submit</button>
             </form>
         </div>
     </div>
 
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-
     <script>
         // Modal toggle
-        function togglePopup(show) {
+        function togglePopup(show, client = null) {
             const modal = document.getElementById('clientFormPopup');
             modal.style.display = show ? 'flex' : 'none';
+
+            if (client) {
+                // Fill in the form for editing
+                document.getElementById('clientId').value = client.id;
+                document.getElementById('clientName').value = client.clientName;
+                document.getElementById('email').value = client.email;
+                document.getElementById('contact').value = client.contact;
+                document.getElementById('address').value = client.address;
+                document.getElementById('settlementDate').value = client.settlementDate;
+                document.getElementById('typeOfClient').value = client.typeOfClient;
+                document.getElementById('propertyType').value = client.propertyType;
+                document.getElementById('notes').value = client.notes;
+            } else {
+                // Reset form for new entry
+                document.getElementById('clientForm').reset();
+            }
         }
 
         // Add client button functionality
         document.getElementById('addClientBtn').addEventListener('click', function() {
-            document.getElementById('clientForm').reset(); // Reset form before showing modal
             togglePopup(true);
         });
 
         // Submit client form data
         function submitClientForm() {
             const formData = new FormData(document.getElementById('clientForm'));
+            const clientId = document.getElementById('clientId').value;
+            const url = clientId ? `/api/client_files/${clientId}` : '/api/client_files';
+            const method = clientId ? 'PUT' : 'POST';
 
-            // Send form data to the backend via Fetch
-            fetch('/api/client_files', {
-                method: 'POST',
+            fetch(url, {
+                method: method,
                 body: formData
             })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Form submission failed.');
-                }
-            })
+            .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                // Optionally add a success message or reload the entries
-                addClientEntryToDOM(data);  // Update DOM with the new entry
-                togglePopup(false);         // Close the modal
+                togglePopup(false);
+                loadClientFiles();
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('There was an error submitting the form. Please try again.');
+                alert('There was an error submitting the form.');
             });
         }
 
-        // Function to dynamically add the new client entry to the DOM
-        function addClientEntryToDOM(clientData) {
-            const newEntryDiv = document.createElement('div');
-            newEntryDiv.className = 'client-entry';
-            newEntryDiv.innerHTML = `
-                <p><strong>File Number:</strong> ${clientData.fileNumber}</p>
-                <p><strong>Client Name:</strong> ${clientData.clientName}</p>
-                <p><strong>Address:</strong> ${clientData.address}</p>
-                <p><strong>Settlement Date:</strong> ${clientData.settlementDate}</p>
-                <p><strong>Type of Client:</strong> ${clientData.typeOfClient}</p>
-                <p><strong>Progress:</strong> ${clientData.progress}</p>
-                <p><strong>Notes:</strong> ${clientData.notes}</p>
-            `;
-            document.getElementById('clientEntries').appendChild(newEntryDiv);
-        }
-
-        // Load client entries when the page is loaded
-        window.onload = function() {
+        // Load client entries
+        function loadClientFiles() {
             fetch('/api/client_files')
             .then(response => response.json())
             .then(data => {
-                data.forEach(client => addClientEntryToDOM(client)); // Add each client entry to the DOM
+                const clientEntries = document.getElementById('clientEntries');
+                clientEntries.innerHTML = '';
+                data.forEach(client => {
+                    const clientDiv = document.createElement('div');
+                    clientDiv.className = 'file-entry';
+                    clientDiv.innerHTML = `
+                        <p><strong>Client Name:</strong> ${client.clientName}</p>
+                        <p><strong>Email:</strong> ${client.email}</p>
+                        <p><strong>Contact:</strong> ${client.contact}</p>
+                        <p><strong>Address:</strong> ${client.address}</p>
+                        <p><strong>Settlement Date:</strong> ${client.settlementDate}</p>
+                        <p><strong>Type of Client:</strong> ${client.typeOfClient}</p>
+                        <p><strong>Type of Property:</strong> ${client.propertyType}</p>
+                        <button onclick='togglePopup(true, ${JSON.stringify(client)})'>Edit</button>
+                    `;
+                    clientEntries.appendChild(clientDiv);
+                });
             })
-            .catch(error => {
-                console.error('Error loading client entries:', error);
-            });
+            .catch(error => console.error('Error loading client files:', error));
+        }
+
+        // Load urgent reminders
+        function loadUrgentReminders() {
+            fetch('/api/get_urgent_reminders')
+            .then(response => response.json())
+            .then(data => {
+                const remindersContainer = document.getElementById('urgentRemindersContainer');
+                remindersContainer.innerHTML = '';
+                data.forEach(reminder => {
+                    const reminderDiv = document.createElement('div');
+                    reminderDiv.className = 'urgent-reminder';
+                    reminderDiv.innerHTML = `
+                        <p><strong>${reminder.expense_name}:</strong> ${reminder.amount}</p>
+                        <p><strong>Due on:</strong> ${reminder.reminder_datetime}</p>
+                    `;
+                    remindersContainer.appendChild(reminderDiv);
+                });
+            })
+            .catch(error => console.error('Error loading reminders:', error));
+        }
+
+        // Initialize client files and reminders on load
+        window.onload = function() {
+            loadClientFiles();
+            loadUrgentReminders();
         };
     </script>
 </body>

@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, current_app, jsonify, json
 from IkonConveyancing.app import db
-from IkonConveyancing.app.models import User, EmailTemplate, ClientFile, ChecklistItem, Event, TodoItem
+from IkonConveyancing.app.models import User, EmailTemplate, ClientFile, ChecklistItem, Event, TodoItem, Reminder
 from flask_login import login_user, logout_user, login_required, current_user
 import smtplib
 from email.mime.text import MIMEText
@@ -357,3 +357,20 @@ def delete_event(event_id):
     db.session.delete(event)
     db.session.commit()
     return jsonify({'message': 'Event deleted successfully'}), 200
+@current_app.route('/api/get_urgent_reminders', methods=['GET'])
+@login_required
+def get_urgent_reminders():
+    urgent_reminders = Reminder.query.filter(
+        Reminder.reminder_datetime <= datetime.now(),
+        Reminder.is_paid == False,
+        Reminder.user_id == current_user.id
+    ).all()
+
+    reminder_list = [{
+        'id': reminder.id,
+        'expense_name': reminder.expense.name,
+        'amount': reminder.expense.amount,
+        'reminder_datetime': reminder.reminder_datetime.strftime('%Y-%m-%d %H:%M:%S')
+    } for reminder in urgent_reminders]
+
+    return jsonify(reminder_list)
