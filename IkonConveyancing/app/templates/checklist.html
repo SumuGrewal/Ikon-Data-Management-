@@ -256,7 +256,38 @@
             let activeFileNumber = null;
             let files = [];
 
-            // Save checklist progress for a specific file
+            // Load files into the file list
+            function loadFileNumbers(fileArray = files) {
+                fileList.innerHTML = '';
+                fileArray.forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = `${file.fileNumber} - ${file.settlementDate}`;
+                    li.addEventListener('click', () => selectFile(file.fileNumber, li));
+                    fileList.appendChild(li);
+                });
+            }
+
+            // Handle file selection and load checklist progress
+            function selectFile(fileNumber, element) {
+                // Highlight selected file and remove active class from others
+                document.querySelectorAll('.file-list li').forEach(li => li.classList.remove('active'));
+                element.classList.add('active');
+
+                // Save progress for the previously active file before switching
+                saveChecklistProgress();
+
+                // Display the selected file number
+                fileNumberDisplay.textContent = fileNumber;
+                activeFileNumber = fileNumber;
+
+                // Show checklist section
+                checklistSection.style.display = 'block';
+
+                // Load checklist progress for the selected file
+                loadChecklistProgress(fileNumber);
+            }
+
+            // Save checklist progress to the backend
             function saveChecklistProgress() {
                 if (activeFileNumber) {
                     const checklistData = Array.from(checklistItems).map(item => ({
@@ -299,6 +330,11 @@
                 progressBarFill.style.width = `${progressPercentage}%`;
             }
 
+            // Attach change event to checklist items
+            checklistItems.forEach(item => {
+                item.addEventListener('change', updateProgressBar);
+            });
+
             // Handle adding a new file
             addFileButton.addEventListener('click', function () {
                 const fileNumber = fileNumberInput.value;
@@ -323,37 +359,6 @@
                     .catch(error => console.error('Error:', error));
                 }
             });
-
-            // Handle file selection and load checklist progress
-            function selectFile(fileNumber, element) {
-                // Highlight selected file and remove active class from others
-                document.querySelectorAll('.file-list li').forEach(li => li.classList.remove('active'));
-                element.classList.add('active');
-
-                // Save progress for the previously active file before switching
-                saveChecklistProgress();
-
-                // Display the selected file number
-                fileNumberDisplay.textContent = fileNumber;
-                activeFileNumber = fileNumber;
-
-                // Show checklist section
-                checklistSection.style.display = 'block';
-
-                // Load checklist progress for the selected file
-                loadChecklistProgress(fileNumber);
-            }
-
-            // Load files into the file list
-            function loadFileNumbers(fileArray = files) {
-                fileList.innerHTML = '';
-                fileArray.forEach(file => {
-                    const li = document.createElement('li');
-                    li.textContent = `${file.fileNumber} - ${file.settlementDate}`;
-                    li.addEventListener('click', () => selectFile(file.fileNumber, li));
-                    fileList.appendChild(li);
-                });
-            }
 
             // Handle filter by date
             applyFilterButton.addEventListener('click', function () {

@@ -190,33 +190,35 @@ def profile():
 def calendar():
     return render_template('calendar.html')
 
-# API for calendar events
 @current_app.route('/api/events', methods=['GET', 'POST'])
 @login_required
 def events():
     if request.method == 'POST':
+        # Add a new event
         data = request.json
-        event = Event(
+        new_event = Event(
             title=data['title'],
             start=datetime.fromisoformat(data['start']),
             description=data.get('description', ''),
             priority=data['priority'],
             user_id=current_user.id
         )
-        db.session.add(event)
+        db.session.add(new_event)
         db.session.commit()
         return jsonify({'message': 'Event created successfully'}), 201
 
     elif request.method == 'GET':
+        # Get events by date, or return all events for the current user
         date = request.args.get('date')
         if date:
             events = Event.query.filter(
                 Event.user_id == current_user.id,
                 Event.start.between(f"{date} 00:00:00", f"{date} 23:59:59")
             ).all()
-            return jsonify([event.to_dict() for event in events]), 200
         else:
-            return jsonify({'message': 'Date parameter is missing'}), 400
+            events = Event.query.filter_by(user_id=current_user.id).all()
+
+        return jsonify([event.to_dict() for event in events]), 200
 
 # Checklist route
 @current_app.route('/checklist')
@@ -325,12 +327,13 @@ def save_checklist(file_number):
     data = request.json
     checklist_status = data['checklistStatus']
 
-    # Find the file and update its checklist status (store as JSON in the database)
+    # Find the file and update its checklist status (store it as JSON in the database)
     client_file = ClientFile.query.filter_by(file_number=file_number, user_id=current_user.id).first_or_404()
     client_file.checklist_status = json.dumps(checklist_status)
     db.session.commit()
 
     return jsonify({'message': 'Checklist progress saved successfully'}), 200
+
 
 # Load checklist for a specific file
 @current_app.route('/api/load_checklist/<file_number>', methods=['GET'])
@@ -343,3 +346,14 @@ def load_checklist(file_number):
         checklist_status = {}  # Return empty if no checklist has been saved
 
     return jsonify({'checklistStatus': checklist_status}), 200
+# API to delete an event
+@current_app.route('/api/events/<int:event_id>', methods=['DELETE'])
+@login_required
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    if event.user_id != current_user.id:
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    db.session.delete(event)
+    db.session.commit()
+    return jsonify({'message': 'Event deleted successfully'}), 200

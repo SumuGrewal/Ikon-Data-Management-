@@ -2,6 +2,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from IkonConveyancing.app import db
 from flask_login import UserMixin
 from flask import json
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,8 +51,16 @@ class ClientFile(db.Model):
     settlement_date = db.Column(db.Date, nullable=False)
     type_of_client = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
-    progress = db.Column(db.String(50), nullable=False)  # Add this line
-    checklist_status = db.Column(db.Text, nullable=False, default=json.dumps([False] * 7))
+    progress = db.Column(db.String(50), nullable=False)  # Progress bar value
+    
+    # Add this line for user reference
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    # Relationship with the user (owner of the file)
+    user = db.relationship('User', backref='client_files', lazy=True)
+
+    # If you're saving the checklist as JSON, include this column
+    checklist_status = db.Column(db.Text, nullable=True)
 
     def to_dict(self):
         return {
@@ -59,11 +69,10 @@ class ClientFile(db.Model):
             'client_name': self.client_name,
             'settlement_date': self.settlement_date.isoformat(),
             'type_of_client': self.type_of_client,
-            'progress': self.progress,  # Add this line to the dict
+            'progress': self.progress,
             'notes': self.notes,
-            'checklist_status': json.loads(self.checklist_status)  # Load checklist status as JSON
+            'checklist_status': self.checklist_status
         }
-
 class ChecklistItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_file_id = db.Column(db.Integer, db.ForeignKey('client_file.id'), nullable=False)

@@ -1,12 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar - Ikon Conveyancing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='Calendar/style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .navigation {
+            width: 250px;
+            background-color: #162938;
+            color: #fff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .navigation ul li {
+            margin: 20px 0;
+        }
+
+        .navigation ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .navigation ul li a ion-icon {
+            margin-right: 10px;
+        }
+
+        .navigation ul li.active a {
+            background-color: #1e3a5f;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        #calendar {
+            flex: 2;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-form {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-form input,
+        .event-form select,
+        .event-form button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .event-form button {
+            background-color: #162938;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .event-form button:hover {
+            background-color: #1e3a5f;
+        }
+
+        .event-list {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .event-list ul li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-list ul li button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .event-list ul li button:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
         <nav class="navigation">
@@ -15,13 +144,17 @@
                 <li><a href="{{ url_for('client_files') }}"><ion-icon name="folder"></ion-icon> Client Files</a></li>
                 <li><a href="{{ url_for('send_email') }}"><ion-icon name="mail"></ion-icon> Send Email</a></li>
                 <li class="active"><a href="{{ url_for('calendar') }}"><ion-icon name="calendar"></ion-icon> Calendar</a></li>
-                <li><a href="#"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
+                <li><a href="{{ url_for('checklist') }}"><ion-icon name="checkmark"></ion-icon> Checklist</a></li>
                 <li><a href="{{ url_for('logout') }}"><ion-icon name="log-out"></ion-icon> Log-Off</a></li>
                 <li><a href="{{ url_for('profile') }}"><ion-icon name="person"></ion-icon> Profile</a></li>
             </ul>
         </nav>
-        <main class="calendar-content">
+
+        <main class="main-content">
+            <!-- Calendar -->
             <div id="calendar"></div>
+
+            <!-- Event Form -->
             <div class="event-form">
                 <h2>Add Event</h2>
                 <form id="add-event-form">
@@ -33,64 +166,144 @@
                         <option value="medium">Medium</option>
                         <option value="high">High</option>
                     </select>
-                    <label for="event-reminder">Set Reminder:</label>
-                    <input type="checkbox" id="event-reminder">
                     <button type="submit">Add Event</button>
                 </form>
             </div>
+
+            <!-- Today's Events List -->
             <div class="event-list">
                 <h2>Today's Events</h2>
                 <ul id="today-events"></ul>
             </div>
         </main>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
-    <script src="{{ url_for('static', filename='calendar/script.js') }}"></script>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-</body>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: '/api/events',
-            dateClick: function(info) {
-                // Handle date click event
-            }
-        });
-        calendar.render();
-    
-        document.getElementById('add-event-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            var title = document.getElementById('event-title').value;
-            var start = document.getElementById('event-datetime').value;
-            var description = document.getElementById('event-description').value;
-            var priority = document.getElementById('event-priority').value;
-            var reminder = document.getElementById('event-reminder').checked;
-    
-            fetch('/api/events', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                body: JSON.stringify({
-                    title: title,
-                    start: start,
-                    description: description,
-                    priority: priority,
-                    reminder: reminder
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'Event created successfully') {
-                    calendar.refetchEvents();
-                } else {
-                    alert('Error creating event');
+                events: '/api/events',
+                dateClick: function (info) {
+                    fetchEvents(info.dateStr);
+                },
+                eventClick: function (info) {
+                    showEventDetails(info.event);
+                },
+                eventDidMount: function (info) {
+                    // Darken the cell for days with events
+                    let eventStartDate = info.event.start;
+                    let calendarDay = document.querySelector(`.fc-day[data-date='${eventStartDate.toISOString().split('T')[0]}']`);
+                    if (calendarDay) {
+                        calendarDay.style.backgroundColor = '#f0e68c';
+                    }
                 }
             });
+            calendar.render();
+
+            document.getElementById('add-event-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                addEvent();
+            });
+
+            // Fetch today's events after loading the calendar
+            fetchTodayEvents();
+
+            function fetchEvents(date) {
+                fetch(`/api/events?date=${date}`)
+                    .then(response => response.json())
+                    .then(events => {
+                        updateEventList(events);
+                    });
+            }
+
+            function fetchTodayEvents() {
+                let today = new Date().toISOString().split('T')[0];
+                fetch(`/api/events?date=${today}`)
+                    .then(response => response.json())
+                    .then(events => {
+                        updateTodayEventList(events);
+                    });
+            }
+
+            function addEvent() {
+                const title = document.getElementById('event-title').value;
+                const datetime = document.getElementById('event-datetime').value;
+                const description = document.getElementById('event-description').value;
+                const priority = document.getElementById('event-priority').value;
+
+                fetch('/api/events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        start: datetime,
+                        description: description,
+                        priority: priority
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message === 'Event created successfully') {
+                            calendar.refetchEvents();
+                            document.getElementById('add-event-form').reset();
+                            alert('Event added successfully!');
+                            fetchTodayEvents(); // Update today's events after adding an event
+                        } else {
+                            alert('Error adding event');
+                        }
+                    });
+            }
+
+            function updateTodayEventList(events) {
+                const eventList = document.getElementById('today-events');
+                eventList.innerHTML = '';
+                events.forEach(event => {
+                    const li = document.createElement('li');
+                    li.textContent = `${event.title} - ${new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                    
+                    // Add delete button
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.addEventListener('click', () => deleteEvent(event.id, li));
+
+                    li.appendChild(deleteBtn);
+                    eventList.appendChild(li);
+                });
+            }
+
+            function deleteEvent(eventId, eventElement) {
+                fetch(`/api/events/${eventId}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message === 'Event deleted successfully') {
+                            eventElement.remove();
+                            calendar.refetchEvents(); // Update calendar after deleting event
+                            fetchTodayEvents(); // Refresh today's event list
+                        } else {
+                            alert('Error deleting event');
+                        }
+                    });
+            }
+
+            function showEventDetails(event) {
+                alert(`Event: ${event.title}\nTime: ${event.start.toISOString()}\nDescription: ${event.extendedProps.description}`);
+            }
         });
-    });
-</script>
+    </script>
+</body>
+
 </html>
